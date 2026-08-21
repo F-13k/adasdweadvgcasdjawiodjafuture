@@ -1,8 +1,4 @@
-// --- IMPORTATION FIREBASE ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-
-// --- CONFIGURATION FIREBASE ---
+// --- CONFIGURATION FIREBASE CLASSIQUE ---
 const firebaseConfig = {
   apiKey: "AIzaSyCRiUSyocGDUNaGN7cAgbVJAXGDBFt0v5c",
   authDomain: "future-be1d6.firebaseapp.com",
@@ -13,17 +9,16 @@ const firebaseConfig = {
   measurementId: "G-R03K1D0KYC"
 };
 
-// Initialisation de l'application et de l'authentification
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
+// Initialisation
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 
 // ==========================================
 // 1. GESTION DE L'AUTHENTIFICATION (COMPTES)
 // ==========================================
 let isLoginMode = true;
 
-const authModal = document.getElementById('auth-modal');
+const authSidebar = document.getElementById('auth-sidebar');
 const btnCompte = document.getElementById('btn-compte');
 const closeAuth = document.getElementById('close-auth');
 const toggleAuthMode = document.getElementById('toggle-auth-mode');
@@ -37,12 +32,12 @@ const sectionDashboard = document.getElementById('section-dashboard');
 const userEmailDisplay = document.getElementById('user-email');
 const btnLogout = document.getElementById('btn-logout');
 
-// Ouvrir / Fermer la fenêtre de compte
+// Ouvrir / Fermer le panneau compte (Gauche)
 btnCompte.addEventListener('click', () => {
-    authModal.style.display = 'flex';
+    authSidebar.classList.add('active');
 });
 closeAuth.addEventListener('click', () => {
-    authModal.style.display = 'none';
+    authSidebar.classList.remove('active');
 });
 
 // Basculer entre Connexion et Inscription
@@ -59,7 +54,7 @@ toggleAuthMode.addEventListener('click', () => {
     }
 });
 
-// Action du bouton principal (S'inscrire / Se connecter)
+// Bouton Valider
 btnSubmitAuth.addEventListener('click', () => {
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -70,8 +65,8 @@ btnSubmitAuth.addEventListener('click', () => {
     }
 
     if(isLoginMode) {
-        // Logique de Connexion
-        signInWithEmailAndPassword(auth, email, password)
+        // Connexion
+        auth.signInWithEmailAndPassword(email, password)
             .then((userCredential) => {
                 alert("Connexion réussie ! Bienvenue sur Future.");
                 emailInput.value = "";
@@ -82,8 +77,8 @@ btnSubmitAuth.addEventListener('click', () => {
                 console.error(error);
             });
     } else {
-        // Logique d'Inscription
-        createUserWithEmailAndPassword(auth, email, password)
+        // Inscription
+        auth.createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
                 alert("Compte créé avec succès ! Bienvenue dans la famille Future.");
                 emailInput.value = "";
@@ -96,23 +91,21 @@ btnSubmitAuth.addEventListener('click', () => {
     }
 });
 
-// Action de Déconnexion
+// Déconnexion
 btnLogout.addEventListener('click', () => {
-    signOut(auth).then(() => {
+    auth.signOut().then(() => {
         alert("Vous êtes déconnecté.");
     });
 });
 
-// Observer l'état de l'utilisateur en direct (Le Gardien)
-onAuthStateChanged(auth, (user) => {
+// Observer l'état
+auth.onAuthStateChanged((user) => {
     if (user) {
-        // Utilisateur connecté
         btnCompte.innerText = "MON ESPACE";
         sectionLogin.style.display = "none";
         sectionDashboard.style.display = "block";
         userEmailDisplay.innerText = user.email;
     } else {
-        // Utilisateur déconnecté
         btnCompte.innerText = "MON COMPTE";
         sectionLogin.style.display = "block";
         sectionDashboard.style.display = "none";
@@ -129,7 +122,7 @@ const cartSidebar = document.getElementById('cart-sidebar');
 const btnPanier = document.getElementById('btn-panier');
 const closeCartBtn = document.getElementById('close-cart-btn');
 
-// Ouvrir / Fermer le panier
+// Ouvrir / Fermer le panier (Droite)
 btnPanier.addEventListener('click', () => {
     cartSidebar.classList.add('active');
 });
@@ -137,14 +130,12 @@ closeCartBtn.addEventListener('click', () => {
     cartSidebar.classList.remove('active');
 });
 
-// Fonction pour ajouter au panier (appelée depuis le HTML)
-window.ajouterAuPanier = function(nom, prix) {
+function ajouterAuPanier(nom, prix) {
     panier.push({ nom: nom, prix: prix });
     mettreAJourPanier();
-    cartSidebar.classList.add('active'); // Ouvre le panier
+    cartSidebar.classList.add('active');
 }
 
-// Mettre à jour l'affichage du panier
 function mettreAJourPanier() {
     const conteneurArticles = document.getElementById('cart-items');
     const compteur = document.getElementById('cart-count');
