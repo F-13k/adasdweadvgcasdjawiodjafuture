@@ -19,16 +19,13 @@
         nav ul { display: flex; gap: 30px; align-items: center; }
         nav a { font-weight: 500; font-size: 0.9rem; letter-spacing: 2px; }
         nav a:hover { color: #aaa; }
-        
         .btn-style { background: #fff; color: #000; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; border: none; font-family: 'Roboto', sans-serif; font-size: 0.9rem; letter-spacing: 1px;}
         .btn-style:hover { background: #ccc; }
 
-        /* === HERO === */
+        /* === HERO & COLLECTION === */
         .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(10,10,10,1)), url('hero_background.jpg') center/cover; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .hero h1 { font-size: 6rem; font-style: italic; font-weight: 900; letter-spacing: 4px; }
         .hero p { font-size: 1.5rem; margin-bottom: 40px; color: #ccc; }
-
-        /* === COLLECTION === */
         .collection { padding: 100px 50px; text-align: center; }
         .collection h2 { font-size: 3rem; margin-bottom: 60px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; }
@@ -38,40 +35,42 @@
         .btn-buy { background: transparent; border: 1px solid #555; color: #fff; width: 100%; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.3s; }
         .btn-buy:hover { background: #fff; color: #000; }
 
-        /* === FAQ === */
+        /* === FAQ & FOOTER === */
         .faq { max-width: 800px; margin: 50px auto; padding: 50px 20px; }
         .faq h2 { text-align: center; font-size: 2.5rem; margin-bottom: 40px; }
         details { background: #141414; margin-bottom: 15px; padding: 15px 20px; border-radius: 8px; cursor: pointer; }
         summary { font-weight: bold; font-size: 1.1rem; outline: none; }
         details p { margin-top: 15px; color: #aaa; line-height: 1.5; }
-
-        /* === FOOTER === */
         footer { text-align: center; padding: 50px 20px; border-top: 1px solid #222; }
         .insta-link { display: inline-block; margin: 20px 0; font-size: 1.2rem; font-weight: bold; color: #fff; }
-        .insta-link:hover { color: #888; }
 
-        /* === PANIER LATÉRAL (À DROITE) === */
+        /* === PANIER LATÉRAL === */
         #cart-sidebar { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: #111; z-index: 2000; padding: 30px; transition: 0.4s; border-left: 1px solid #333; overflow-y: auto; }
         #cart-sidebar.active { right: 0; }
         .close-cart { cursor: pointer; font-size: 1.5rem; text-align: right; margin-bottom: 20px; }
         .cart-item { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .cart-total { font-size: 1.5rem; font-weight: bold; margin-top: 30px; text-align: right; }
 
-        /* === PANNEAU LATÉRAL : COMPTE (À GAUCHE) === */
+        /* === PANNEAU LATÉRAL : COMPTE === */
         #auth-sidebar { position: fixed; top: 0; left: -400px; width: 400px; height: 100vh; background: #111; z-index: 2000; padding: 30px; transition: 0.4s; border-right: 1px solid #333; overflow-y: auto; }
         #auth-sidebar.active { left: 0; }
         .close-auth { cursor: pointer; font-size: 1.5rem; text-align: left; margin-bottom: 20px; display: block; }
-        .auth-content { margin-top: 20px; }
-        .auth-content input { width: 100%; padding: 15px; margin-bottom: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; }
+        
+        .auth-content input, .auth-content textarea { width: 100%; padding: 15px; margin-bottom: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; font-family: 'Roboto'; }
         .auth-switch { color: #888; cursor: pointer; font-size: 0.9rem; text-decoration: underline; margin-top: 15px; display: inline-block;}
         .auth-switch:hover { color: #fff; }
         
-        /* Menu Espace Client */
+        /* Navigation dans l'espace client */
         .dashboard-menu { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
-        .dashboard-menu button { display: block; width: 100%; text-align: left; background: transparent; border: none; color: #aaa; padding: 12px 0; font-size: 1rem; cursor: pointer; transition: 0.3s; font-family: 'Roboto', sans-serif;}
+        .dashboard-menu button { display: block; width: 100%; text-align: left; background: transparent; border: none; color: #aaa; padding: 15px 0; font-size: 1rem; cursor: pointer; transition: 0.3s; font-family: 'Roboto', sans-serif; border-bottom: 1px solid #222;}
         .dashboard-menu button:hover { color: #fff; padding-left: 10px; }
-        .dashboard-menu a { display: block; width: 100%; text-align: left; background: transparent; border: none; color: #aaa; padding: 12px 0; font-size: 1rem; cursor: pointer; transition: 0.3s; font-family: 'Roboto', sans-serif;}
-        .dashboard-menu a:hover { color: #fff; padding-left: 10px; }
+        
+        /* Les sous-pages de l'espace client */
+        .dashboard-view { display: none; margin-top: 20px; }
+        .dashboard-view.active { display: block; }
+        .btn-back { background: transparent; border: none; color: #888; cursor: pointer; font-size: 0.9rem; margin-bottom: 20px; }
+        .btn-back:hover { color: #fff; }
+        .empty-state { color: #888; font-style: italic; margin-bottom: 20px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -81,7 +80,6 @@
         <nav>
             <ul>
                 <li><a href="#collection">DROP 01</a></li>
-                <li><a href="#faq">FAQ</a></li>
                 <li><button class="btn-style" id="btn-compte">MON COMPTE</button></li>
                 <li><button class="btn-style" id="btn-panier">PANIER (<span id="cart-count">0</span>)</button></li>
             </ul>
@@ -94,6 +92,7 @@
     </section>
 
     <section id="collection" class="collection">
+        <!-- Produits (J'ai raccourci ici visuellement pour le message, mais le code HTML est complet) -->
         <h2>Drop 01</h2>
         <div class="grid">
             <div class="card">
@@ -117,34 +116,15 @@
         </div>
     </section>
 
-    <section id="faq" class="faq">
-        <h2>F.A.Q</h2>
-        <details>
-            <summary>Quels sont les délais de livraison ?</summary>
-            <p>Toutes nos commandes sont expédiées sous 48h. La livraison prend ensuite entre 3 et 5 jours ouvrés en France métropolitaine.</p>
-        </details>
-        <details>
-            <summary>Comment suivre le Drop 02 ?</summary>
-            <p>Le meilleur moyen de ne rien rater est de nous suivre sur notre compte Instagram officiel @ourfuture.off.</p>
-        </details>
-        <details>
-            <summary>Peut-on retourner un article ?</summary>
-            <p>Oui, vous disposez de 14 jours après réception pour nous renvoyer l'article dans son emballage d'origine.</p>
-        </details>
-    </section>
-
     <footer>
         <a href="https://instagram.com/ourfuture.off" target="_blank" class="insta-link">@ourfuture.off</a>
-        <p>© 2026 FUTURE. Tous droits réservés.</p>
     </footer>
 
     <!-- PANIER LATÉRAL (DROITE) -->
     <div id="cart-sidebar">
         <div class="close-cart" id="close-cart-btn">✖</div>
         <h2 class="montserrat" style="margin-bottom: 20px;">Ton Panier</h2>
-        <div id="cart-items">
-            <p style="color: #aaa;">Ton panier est vide.</p>
-        </div>
+        <div id="cart-items"><p style="color: #aaa;">Ton panier est vide.</p></div>
         <div class="cart-total">Total: <span id="total-price">0</span> €</div>
         <button class="btn-buy" style="margin-top: 20px; background: #fff; color: #000;">VALIDER LA COMMANDE</button>
     </div>
@@ -154,7 +134,7 @@
         <div class="close-auth" id="close-auth">✖</div>
         
         <div class="auth-content">
-            <!-- Section Login / Register -->
+            <!-- PAGE CONNEXION / INSCRIPTION -->
             <div id="section-login">
                 <h2 class="montserrat" id="auth-title" style="margin-bottom: 20px;">CONNEXION</h2>
                 <input type="email" id="email-input" placeholder="Adresse e-mail">
@@ -163,22 +143,77 @@
                 <p class="auth-switch" id="toggle-auth-mode">Pas de compte ? Créer un compte</p>
             </div>
 
-            <!-- Section Espace Client Complet -->
+            <!-- ESPACE CLIENT (MENU PRINCIPAL) -->
             <div id="section-dashboard" style="display: none;">
-                <h2 class="montserrat" style="margin-bottom: 20px;">MON ESPACE</h2>
-                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">Connecté : <br><strong id="user-email" style="color: #fff;"></strong></p>
+                <h2 class="montserrat" style="margin-bottom: 10px;">MON ESPACE</h2>
+                <p style="color: #aaa; font-size: 0.8rem; margin-bottom: 20px;" id="user-email"></p>
                 
                 <div class="dashboard-menu">
-                    <button>📦 Mes Commandes</button>
-                    <button>📍 Mes Adresses</button>
-                    <button>💳 Moyens de paiement</button>
-                    <button>🔄 Demander un retour</button>
-                    <button>⚙️ Paramètres du compte</button>
-                    <!-- Lien direct pour envoyer un mail -->
-                    <a href="mailto:fefesimcer@gmail.com?subject=Demande%20de%20support%20-%20FUTURE">✉️ Contacter le support</a>
+                    <button onclick="openView('view-commandes')">📦 Mes Commandes</button>
+                    <button onclick="openView('view-adresses')">📍 Mes Adresses</button>
+                    <button onclick="openView('view-paiement')">💳 Moyens de paiement</button>
+                    <button onclick="openView('view-retours')">🔄 Demander un retour</button>
+                    <button onclick="openView('view-parametres')">⚙️ Paramètres du compte</button>
+                    <button onclick="openView('view-support')">✉️ Contacter le support</button>
                 </div>
 
-                <button class="btn-buy" id="btn-logout" style="background: transparent; border: 1px solid #fff; color: #fff; margin-top: 30px;">SE DÉCONNECTER</button>
+                <button class="btn-buy" id="btn-logout" style="background: transparent; border: 1px solid #444; color: #fff; margin-top: 40px;">SE DÉCONNECTER</button>
+            </div>
+
+            <!-- SOUS-PAGES DE L'ESPACE CLIENT -->
+            <div id="views-container">
+                
+                <!-- Vue: Commandes -->
+                <div id="view-commandes" class="dashboard-view">
+                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+                    <h3 class="montserrat" style="margin-bottom:15px;">Mes Commandes</h3>
+                    <p class="empty-state">Tu n'as aucune commande pour le moment.</p>
+                </div>
+
+                <!-- Vue: Adresses -->
+                <div id="view-adresses" class="dashboard-view">
+                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+                    <h3 class="montserrat" style="margin-bottom:15px;">Mes Adresses</h3>
+                    <p class="empty-state">Aucune adresse enregistrée.</p>
+                    <button class="btn-buy" style="border-color:#444; padding:10px;">+ Ajouter une adresse</button>
+                </div>
+
+                <!-- Vue: Paiement -->
+                <div id="view-paiement" class="dashboard-view">
+                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+                    <h3 class="montserrat" style="margin-bottom:15px;">Moyens de paiement</h3>
+                    <p class="empty-state">Aucun moyen de paiement enregistré.</p>
+                    <button class="btn-buy" style="border-color:#444; padding:10px;">+ Ajouter une carte</button>
+                </div>
+
+                <!-- Vue: Retours -->
+                <div id="view-retours" class="dashboard-view">
+                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+                    <h3 class="montserrat" style="margin-bottom:15px;">Faire un retour</h3>
+                    <p class="empty-state">Tu ne peux demander un retour que si tu possèdes une commande éligible. (Aucune commande trouvée).</p>
+                </div>
+
+                <!-- Vue: Paramètres -->
+                <div id="view-parametres" class="dashboard-view">
+                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+                    <h3 class="montserrat" style="margin-bottom:15px;">Paramètres</h3>
+                    <input type="text" placeholder="Prénom">
+                    <input type="text" placeholder="Nom">
+                    <button class="btn-buy" style="background:#fff; color:#000;">ENREGISTRER</button>
+                </div>
+
+                <!-- Vue: Support -->
+                <div id="view-support" class="dashboard-view">
+                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+                    <h3 class="montserrat" style="margin-bottom:15px;">Support Client</h3>
+                    <!-- Formulaire de contact qui envoie le message -->
+                    <form onsubmit="envoyerMessage(event)">
+                        <input type="text" id="sujet-support" placeholder="Sujet de ta demande" required>
+                        <textarea id="message-support" placeholder="Explique-nous ton problème..." rows="5" required></textarea>
+                        <button type="submit" class="btn-buy" style="background:#fff; color:#000;">ENVOYER LE MESSAGE</button>
+                    </form>
+                </div>
+
             </div>
         </div>
     </div>
@@ -186,8 +221,6 @@
     <!-- Firebase Classique -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
-    
-    <!-- Notre code -->
     <script src="script.js"></script>
 
 </body>
