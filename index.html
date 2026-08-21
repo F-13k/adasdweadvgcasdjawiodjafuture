@@ -148,12 +148,15 @@
                 <p style="color: #aaa; font-size: 0.8rem; margin-bottom: 20px;" id="user-email"></p>
                 
                 <div class="dashboard-menu">
+                    <!-- LE BOUTON SECRET (Caché par défaut) -->
+                    <button id="btn-admin-menu" onclick="openView('view-admin')" style="display: none; color: #fff; background: #222; border-radius: 5px; margin-bottom: 15px; border: 1px solid #555;">👑 ESPACE PATRON</button>
+                    
                     <button onclick="openView('view-commandes')">📦 Mes Commandes</button>
                     <button onclick="openView('view-adresses')">📍 Mes Adresses</button>
                     <button onclick="openView('view-paiement')">💳 Moyens de paiement</button>
                     <button onclick="openView('view-retours')">🔄 Demander un retour</button>
+                    <button onclick="openView('view-support')">💬 Support Client</button>
                     <button onclick="openView('view-parametres')">⚙️ Paramètres du compte</button>
-                    <button onclick="openView('view-support')">✉️ Contacter le support</button>
                 </div>
 
                 <button class="btn-buy" id="btn-logout" style="background: transparent; border: 1px solid #444; color: #fff; margin-top: 40px;">SE DÉCONNECTER</button>
@@ -162,22 +165,33 @@
             <!-- SOUS-PAGES DE L'ESPACE CLIENT -->
             <div id="views-container">
                 
+                <!-- Vue: Espace Admin Secret -->
+                <div id="view-admin" class="dashboard-view">
+                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+                    <h3 class="montserrat" style="margin-bottom:15px; color: #fff;">ESPACE PATRON</h3>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px;">
+                        <button class="btn-style" onclick="chargerAdminCommandes()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Commandes</button>
+                        <button class="btn-style" onclick="chargerAdminRetours()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Retours</button>
+                        <button class="btn-style" onclick="chargerAdminSupport()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Support</button>
+                    </div>
+
+                    <div id="admin-content">
+                        <p class="empty-state">Sélectionne une catégorie ci-dessus.</p>
+                    </div>
+                </div>
+
                 <!-- Vue: Commandes -->
                 <div id="view-commandes" class="dashboard-view">
-                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
-                    <h3 class="montserrat" style="margin-bottom:15px;">Mes Commandes</h3>
-                    <p class="empty-state">Tu n'as aucune commande pour le moment.</p>
+                    <!-- Injecté par JS -->
                 </div>
 
                 <!-- Vue: Adresses -->
                 <div id="view-adresses" class="dashboard-view">
                     <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Mes Adresses</h3>
-                    
                     <div id="adresses-list"><p class="empty-state">Aucune adresse enregistrée.</p></div>
-
-                    <button class="btn-buy" id="btn-show-address" style="border-color:#444; margin-bottom: 15px;">+ Ajouter une adresse</button>
-                    
+                    <button class="btn-buy" id="btn-show-address" style="border-color:#444; margin-bottom: 15px; margin-top: 15px;">+ Ajouter une adresse</button>
                     <form id="form-address" style="display: none;" onsubmit="sauvegarderAdresse(event)">
                         <input type="text" id="addr-rue" placeholder="Numéro et rue" required>
                         <input type="text" id="addr-cp" placeholder="Code postal" required>
@@ -190,28 +204,18 @@
                 <div id="view-paiement" class="dashboard-view">
                     <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Moyens de paiement</h3>
-                    
                     <div id="cartes-list"><p class="empty-state">Aucun moyen de paiement enregistré.</p></div>
-
-                    <button class="btn-buy" id="btn-show-card" style="border-color:#444; margin-bottom: 15px;">+ Ajouter une carte</button>
-                    
+                    <button class="btn-buy" id="btn-show-card" style="border-color:#444; margin-bottom: 15px; margin-top: 15px;">+ Ajouter une carte</button>
                     <form id="form-card" style="display: none;" onsubmit="sauvegarderCarte(event)">
-                        <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">(Sécurisé en attendant Stripe)</p>
-                        <input type="text" id="card-nom" placeholder="Nom sur la carte" required>
+                        <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">(Sécurisé par Stripe)</p>
                         <input type="text" id="card-numero" placeholder="Numéro de carte (ex: 4242 4242...)" maxlength="16" required>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" id="card-exp" placeholder="MM/AA" maxlength="5" required>
-                            <input type="text" id="card-cvc" placeholder="CVC" maxlength="3" required>
-                        </div>
                         <button type="submit" class="btn-buy" style="background:#fff; color:#000;">ENREGISTRER</button>
                     </form>
                 </div>
 
                 <!-- Vue: Retours -->
                 <div id="view-retours" class="dashboard-view">
-                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
-                    <h3 class="montserrat" style="margin-bottom:15px;">Faire un retour</h3>
-                    <p class="empty-state">Tu ne peux demander un retour que si tu possèdes une commande éligible.</p>
+                    <!-- Injecté par JS -->
                 </div>
 
                 <!-- Vue: Paramètres -->
@@ -223,16 +227,44 @@
                     <button class="btn-buy" style="background:#fff; color:#000;">METTRE À JOUR</button>
                 </div>
 
-                <!-- Vue: Support -->
+                <!-- Vue: Support (NOUVEAU DESIGN MESSAGERIE) -->
                 <div id="view-support" class="dashboard-view">
                     <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Support Client</h3>
-                    <form onsubmit="envoyerMessage(event)">
+                    
+                    <!-- Liste des conversations -->
+                    <div id="support-tickets-list">
+                        <p class="empty-state">Chargement de tes tickets...</p>
+                    </div>
+
+                    <button class="btn-buy" id="btn-show-ticket-form" style="border-color:#444; margin-bottom: 15px; margin-top: 20px;" onclick="afficherFormulaireTicket()">+ Nouvelle Demande</button>
+
+                    <!-- Formulaire de création de ticket -->
+                    <form id="form-support" style="display: none;" onsubmit="creerNouveauTicket(event)">
                         <input type="text" id="sujet-support" placeholder="Sujet de ta demande" required>
                         <textarea id="message-support" placeholder="Explique-nous ton problème..." rows="5" required></textarea>
-                        <button type="submit" class="btn-buy" style="background:#fff; color:#000;">ENVOYER LE MESSAGE</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn-buy" style="background: transparent; color: #fff; border-color: #444;" onclick="cacherFormulaireTicket()">ANNULER</button>
+                            <button type="submit" class="btn-buy" style="background:#fff; color:#000;">ENVOYER</button>
+                        </div>
                     </form>
+
+                    <!-- L'intérieur d'une conversation (caché par défaut) -->
+                    <div id="support-conversation" style="display: none; margin-top: 20px; background: #141414; padding: 15px; border-radius: 8px; border: 1px solid #333;">
+                        <button class="btn-back" onclick="fermerConversation()" style="margin-bottom: 10px;">⬅ Retour à la liste</button>
+                        <h4 id="conv-sujet" style="margin-bottom: 15px; color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px;">Sujet</h4>
+                        
+                        <!-- Ici on injectera les bulles de chat -->
+                        <div id="conv-messages" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
+                        </div>
+                        
+                        <div id="conv-reply-box" style="display: flex; flex-direction: column; gap: 10px;">
+                            <textarea id="reply-support-client" placeholder="Écrire un message..." rows="2" style="width: 100%; padding: 12px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; resize: none;"></textarea>
+                            <button class="btn-buy" style="background:#fff; color:#000; padding: 10px;" onclick="repondreAuTicket()">ENVOYER LA RÉPONSE</button>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -243,7 +275,6 @@
     <!-- SCRIPTS FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
-    <!-- AJOUTE CETTE LIGNE POUR LA BASE DE DONNÉES : -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     
     <!-- NOTRE SCRIPT -->
