@@ -22,7 +22,62 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ==========================================
-// 2. GESTION DE L'AUTHENTIFICATION (COMPTES)
+// 2. SYSTÈME DE NOTIFICATION CUSTOM (STYLE FIVEM)
+// ==========================================
+// On injecte le CSS de l'animation directement depuis le JS
+const styleNotif = document.createElement('style');
+styleNotif.innerHTML = `
+    .custom-notification {
+        position: fixed;
+        top: 30px;
+        left: -500px; /* Caché à gauche */
+        transform: translateX(-50%);
+        background: #fff;
+        color: #000;
+        padding: 15px 30px;
+        border-radius: 5px;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: bold;
+        font-size: 0.9rem;
+        z-index: 9999;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        transition: left 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        text-transform: uppercase;
+        text-align: center;
+        border-left: 5px solid #000;
+    }
+    .custom-notification.show {
+        left: 50%; /* Centre de l'écran */
+    }
+    .custom-notification.hide {
+        left: 150vw; /* Repart loin à droite */
+    }
+`;
+document.head.appendChild(styleNotif);
+
+// La fonction magique pour afficher les messages
+window.afficherNotification = function(message) {
+    const notif = document.createElement('div');
+    notif.className = 'custom-notification';
+    notif.innerText = message;
+    document.body.appendChild(notif);
+
+    // 1. Glisse vers le centre
+    setTimeout(() => notif.classList.add('show'), 50);
+    
+    // 2. Attend 3.5 secondes, puis glisse vers la droite
+    setTimeout(() => {
+        notif.classList.remove('show');
+        notif.classList.add('hide');
+    }, 3500);
+
+    // 3. Supprime l'élément du code
+    setTimeout(() => notif.remove(), 4200);
+}
+
+
+// ==========================================
+// 3. GESTION DE L'AUTHENTIFICATION (COMPTES)
 // ==========================================
 let isLoginMode = true;
 
@@ -58,20 +113,31 @@ toggleAuthMode.addEventListener('click', () => {
 btnSubmitAuth.addEventListener('click', () => {
     const email = emailInput.value;
     const password = passwordInput.value;
-    if (!email || !password) return alert("Veuillez remplir tous les champs.");
+    if (!email || !password) return afficherNotification("Veuillez remplir tous les champs.");
 
     if(isLoginMode) {
         auth.signInWithEmailAndPassword(email, password)
-            .then(() => { emailInput.value = ""; passwordInput.value = ""; closeView(); })
-            .catch(err => alert("Erreur de connexion. Vérifiez vos identifiants."));
+            .then(() => { 
+                emailInput.value = ""; passwordInput.value = ""; 
+                closeView(); 
+                afficherNotification("Connexion réussie !");
+            })
+            .catch(err => afficherNotification("Erreur : Identifiants incorrects."));
     } else {
         auth.createUserWithEmailAndPassword(email, password)
-            .then(() => { alert("Compte créé !"); emailInput.value = ""; passwordInput.value = ""; })
-            .catch(err => alert("Erreur : Mot de passe trop court ou e-mail utilisé."));
+            .then(() => { 
+                emailInput.value = ""; passwordInput.value = ""; 
+                afficherNotification("Compte créé avec succès !");
+            })
+            .catch(err => afficherNotification("Erreur lors de la création du compte."));
     }
 });
 
-btnLogout.addEventListener('click', () => { auth.signOut(); closeView(); });
+btnLogout.addEventListener('click', () => { 
+    auth.signOut(); 
+    closeView(); 
+    afficherNotification("Tu es déconnecté.");
+});
 
 auth.onAuthStateChanged((user) => {
     if (user) {
@@ -87,14 +153,13 @@ auth.onAuthStateChanged((user) => {
 });
 
 // ==========================================
-// 3. NAVIGATION ET CHARGEMENT DYNAMIQUE
+// 4. NAVIGATION ET CHARGEMENT DYNAMIQUE
 // ==========================================
 function openView(viewId) {
     sectionDashboard.style.display = "none";
     document.querySelectorAll('.dashboard-view').forEach(view => view.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
     
-    // On charge les données de Firebase selon l'onglet cliqué
     if (viewId === 'view-commandes') chargerCommandes();
     if (viewId === 'view-adresses') chargerAdresses();
     if (viewId === 'view-paiement') chargerCartes();
@@ -151,7 +216,7 @@ function chargerCommandes() {
     }).catch(err => console.error(err));
 }
 
-// -- ADRESSES (Maintenant connectées à Firebase) --
+// -- ADRESSES --
 document.getElementById('btn-show-address').addEventListener('click', () => {
     document.getElementById('form-address').style.display = 'block';
     document.getElementById('btn-show-address').style.display = 'none';
@@ -166,19 +231,19 @@ window.sauvegarderAdresse = async function(event) {
     const ville = document.getElementById('addr-ville').value;
     const adresseComplete = `${rue}, ${cp} ${ville}`;
     
-    // On sauvegarde dans Firebase
     await db.collection('adresses').add({ email: auth.currentUser.email, adresse: adresseComplete });
     
     document.getElementById('form-address').reset();
     document.getElementById('form-address').style.display = 'none';
     document.getElementById('btn-show-address').style.display = 'block';
     chargerAdresses();
+    afficherNotification("Nouvelle adresse sauvegardée !");
 }
 
 function chargerAdresses() {
     if(!auth.currentUser) return;
     const container = document.getElementById('adresses-list');
-    container.innerHTML = 'Chargement...';
+    container.innerHTML = '<p class="empty-state">Chargement...</p>';
     
     db.collection('adresses').where('email', '==', auth.currentUser.email).get().then(snapshot => {
         if(snapshot.empty) {
@@ -192,7 +257,7 @@ function chargerAdresses() {
     });
 }
 
-// -- CARTES (Maintenant connectées à Firebase) --
+// -- CARTES --
 document.getElementById('btn-show-card').addEventListener('click', () => {
     document.getElementById('form-card').style.display = 'block';
     document.getElementById('btn-show-card').style.display = 'none';
@@ -205,19 +270,19 @@ window.sauvegarderCarte = async function(event) {
     const numero = document.getElementById('card-numero').value;
     const derniersChiffres = numero.slice(-4);
     
-    // On sauvegarde que les 4 derniers chiffres dans Firebase
     await db.collection('cartes').add({ email: auth.currentUser.email, chiffres: derniersChiffres });
     
     document.getElementById('form-card').reset();
     document.getElementById('form-card').style.display = 'none';
     document.getElementById('btn-show-card').style.display = 'block';
     chargerCartes();
+    afficherNotification("Moyen de paiement ajouté !");
 }
 
 function chargerCartes() {
     if(!auth.currentUser) return;
     const container = document.getElementById('cartes-list');
-    container.innerHTML = 'Chargement...';
+    container.innerHTML = '<p class="empty-state">Chargement...</p>';
     
     db.collection('cartes').where('email', '==', auth.currentUser.email).get().then(snapshot => {
         if(snapshot.empty) {
@@ -231,7 +296,7 @@ function chargerCartes() {
     });
 }
 
-// -- RETOURS (Maintenant connectés aux commandes) --
+// -- RETOURS (Maintenant connectés à Firebase) --
 function chargerRetours() {
     const container = document.getElementById('view-retours');
     container.innerHTML = `
@@ -269,23 +334,51 @@ function chargerRetours() {
     });
 }
 
-window.demanderRetour = function(idCommande) {
-    alert("Ta demande de retour a été envoyée au service client ! Tu vas recevoir l'étiquette d'expédition par e-mail très vite.");
+window.demanderRetour = async function(idCommande) {
+    if(!auth.currentUser) return;
+    try {
+        await db.collection('retours').add({
+            email: auth.currentUser.email,
+            idCommande: idCommande,
+            dateDemande: firebase.firestore.FieldValue.serverTimestamp(),
+            statut: 'En attente'
+        });
+        afficherNotification("Demande de retour envoyée avec succès !");
+    } catch(e) {
+        afficherNotification("Erreur lors de la demande.");
+    }
 }
 
 // ==========================================
-// 4. FORMULAIRE DE SUPPORT
+// 5. FORMULAIRE DE SUPPORT (Connecté à Firebase)
 // ==========================================
-window.envoyerMessage = function(event) {
+window.envoyerMessage = async function(event) {
     event.preventDefault();
-    alert("Ton message a bien été envoyé au support (fefesimcer@gmail.com) ! Nous te répondrons sous 24h.");
-    document.getElementById('sujet-support').value = "";
-    document.getElementById('message-support').value = "";
-    closeView();
+    if(!auth.currentUser) return;
+    
+    const sujet = document.getElementById('sujet-support').value;
+    const message = document.getElementById('message-support').value;
+
+    try {
+        await db.collection('support').add({
+            email: auth.currentUser.email,
+            sujet: sujet,
+            message: message,
+            date: firebase.firestore.FieldValue.serverTimestamp(),
+            statut: 'Non lu'
+        });
+        
+        document.getElementById('sujet-support').value = "";
+        document.getElementById('message-support').value = "";
+        closeView();
+        afficherNotification("Ton message a été envoyé au support !");
+    } catch(e) {
+        afficherNotification("Erreur lors de l'envoi du message.");
+    }
 }
 
 // ==========================================
-// 5. GESTION DU PANIER & PAIEMENT
+// 6. GESTION DU PANIER & PAIEMENT
 // ==========================================
 let panier = [];
 const cartSidebar = document.getElementById('cart-sidebar');
@@ -329,15 +422,13 @@ const btnCheckout = document.getElementById('btn-checkout');
 
 btnCheckout.addEventListener('click', async () => {
     if (panier.length === 0) {
-        alert("Ton panier est vide !");
-        return;
+        return afficherNotification("Ton panier est vide !");
     }
 
     if (!auth.currentUser) {
-        alert("Tu dois être connecté à ton compte pour commander !");
         cartSidebar.classList.remove('active');
         authSidebar.classList.add('active');
-        return;
+        return afficherNotification("Connecte-toi pour commander !");
     }
 
     btnCheckout.innerText = "CHARGEMENT...";
@@ -346,7 +437,6 @@ btnCheckout.addEventListener('click', async () => {
     try {
         const totalCommande = panier.reduce((somme, article) => somme + article.prix, 0);
         
-        // Sauvegarde la commande
         await db.collection('commandes').add({
             email: auth.currentUser.email,
             articles: panier,
@@ -355,7 +445,6 @@ btnCheckout.addEventListener('click', async () => {
             statut: 'En cours de préparation'
         });
 
-        // Ouvre Stripe
         const response = await fetch('/.netlify/functions/create-checkout', {
             method: 'POST',
             body: JSON.stringify({ panier: panier }),
@@ -366,13 +455,13 @@ btnCheckout.addEventListener('click', async () => {
         if (data.url) {
             window.location.href = data.url;
         } else {
-            alert("Erreur de paiement.");
+            afficherNotification("Erreur de paiement.");
             btnCheckout.innerText = "VALIDER LA COMMANDE";
             btnCheckout.disabled = false;
         }
     } catch (error) {
         console.error("Erreur globale:", error);
-        alert("Erreur lors de la validation de la commande.");
+        afficherNotification("Erreur de connexion au serveur.");
         btnCheckout.innerText = "VALIDER LA COMMANDE";
         btnCheckout.disabled = false;
     }
