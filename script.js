@@ -21,6 +21,9 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// 👇 LA LIGNE À RAJOUTER POUR ACTIVER ANALYTICS 👇
+const analytics = firebase.analytics();
+
 // ⚠️ METS TON E-MAIL ICI POUR AVOIR L'ACCÈS PATRON
 const ADMIN_EMAIL = "fefesimcer@gmail.com"; 
 
