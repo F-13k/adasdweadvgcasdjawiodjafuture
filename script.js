@@ -34,17 +34,14 @@ const authTitle = document.getElementById('auth-title');
 const btnSubmitAuth = document.getElementById('btn-submit-auth');
 const emailInput = document.getElementById('email-input');
 const passwordInput = document.getElementById('password-input');
-
 const sectionLogin = document.getElementById('section-login');
 const sectionDashboard = document.getElementById('section-dashboard');
 const userEmailDisplay = document.getElementById('user-email');
 const btnLogout = document.getElementById('btn-logout');
 
-// Ouvrir / Fermer le panneau compte
 btnCompte.addEventListener('click', () => { authSidebar.classList.add('active'); });
 closeAuth.addEventListener('click', () => { authSidebar.classList.remove('active'); });
 
-// Basculer Connexion/Inscription
 toggleAuthMode.addEventListener('click', () => {
     isLoginMode = !isLoginMode;
     if(isLoginMode) {
@@ -58,7 +55,6 @@ toggleAuthMode.addEventListener('click', () => {
     }
 });
 
-// Valider Connexion/Inscription
 btnSubmitAuth.addEventListener('click', () => {
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -91,17 +87,18 @@ auth.onAuthStateChanged((user) => {
 });
 
 // ==========================================
-// 3. NAVIGATION ET CHARGEMENT DES COMMANDES
+// 3. NAVIGATION ET CHARGEMENT DYNAMIQUE
 // ==========================================
 function openView(viewId) {
     sectionDashboard.style.display = "none";
     document.querySelectorAll('.dashboard-view').forEach(view => view.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
     
-    // Si on ouvre l'onglet commandes, on va chercher les infos dans Firebase
-    if (viewId === 'view-commandes') {
-        chargerCommandes();
-    }
+    // On charge les données de Firebase selon l'onglet cliqué
+    if (viewId === 'view-commandes') chargerCommandes();
+    if (viewId === 'view-adresses') chargerAdresses();
+    if (viewId === 'view-paiement') chargerCartes();
+    if (viewId === 'view-retours') chargerRetours();
 }
 
 function closeView() {
@@ -113,9 +110,9 @@ function closeView() {
     }
 }
 
+// -- COMMANDES --
 function chargerCommandes() {
     const vueCommandes = document.getElementById('view-commandes');
-    
     vueCommandes.innerHTML = `
         <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
         <h3 class="montserrat" style="margin-bottom:15px;">Mes Commandes</h3>
@@ -125,111 +122,159 @@ function chargerCommandes() {
 
     if (!auth.currentUser) return;
 
-    db.collection('commandes')
-      .where('email', '==', auth.currentUser.email)
-      .get()
-      .then((querySnapshot) => {
-          document.getElementById('loading-txt').style.display = 'none';
-          const liste = document.getElementById('liste-commandes');
+    db.collection('commandes').where('email', '==', auth.currentUser.email).get().then((snapshot) => {
+        document.getElementById('loading-txt').style.display = 'none';
+        const liste = document.getElementById('liste-commandes');
 
-          if (querySnapshot.empty) {
-              liste.innerHTML = '<p class="empty-state">Tu n\'as aucune commande pour le moment.</p>';
-              return;
-          }
+        if (snapshot.empty) {
+            liste.innerHTML = '<p class="empty-state">Tu n\'as aucune commande pour le moment.</p>';
+            return;
+        }
 
-          let html = '';
-          querySnapshot.forEach((doc) => {
-              const cmd = doc.data();
-              const date = cmd.date ? cmd.date.toDate().toLocaleDateString('fr-FR') : 'Récente';
-              
-              html += `
-                <div class="saved-item" style="flex-direction: column; align-items: flex-start;">
-                    <div style="width: 100%; display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px;">
-                        <strong>Commande du ${date}</strong>
-                        <span style="color: #4CAF50;">${cmd.statut}</span>
-                    </div>
-                    <ul style="color: #ccc; font-size: 0.85rem; margin-bottom: 10px; width: 100%;">
-                        ${cmd.articles.map(art => `<li>• 1x ${art.nom} - ${art.prix} €</li>`).join('')}
-                    </ul>
-                    <strong>Total : ${cmd.total} €</strong>
+        let html = '';
+        snapshot.forEach((doc) => {
+            const cmd = doc.data();
+            const date = cmd.date ? cmd.date.toDate().toLocaleDateString('fr-FR') : 'Récente';
+            html += `
+            <div class="saved-item" style="flex-direction: column; align-items: flex-start;">
+                <div style="width: 100%; display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px;">
+                    <strong>Commande du ${date}</strong>
+                    <span style="color: #4CAF50;">${cmd.statut}</span>
                 </div>
-              `;
-          });
-          liste.innerHTML = html;
-      })
-      .catch((erreur) => {
-          console.error("Erreur Firebase:", erreur);
-          document.getElementById('loading-txt').innerText = "Erreur de chargement.";
-      });
+                <ul style="color: #ccc; font-size: 0.85rem; margin-bottom: 10px; width: 100%;">
+                    ${cmd.articles.map(art => `<li>• 1x ${art.nom} - ${art.prix} €</li>`).join('')}
+                </ul>
+                <strong>Total : ${cmd.total} €</strong>
+            </div>`;
+        });
+        liste.innerHTML = html;
+    }).catch(err => console.error(err));
 }
 
-// ==========================================
-// 4. GESTION DES ADRESSES ET CARTES
-// ==========================================
-let mesAdresses = [];
-let mesCartes = [];
-
+// -- ADRESSES (Maintenant connectées à Firebase) --
 document.getElementById('btn-show-address').addEventListener('click', () => {
     document.getElementById('form-address').style.display = 'block';
     document.getElementById('btn-show-address').style.display = 'none';
 });
 
+window.sauvegarderAdresse = async function(event) {
+    event.preventDefault();
+    if(!auth.currentUser) return;
+    
+    const rue = document.getElementById('addr-rue').value;
+    const cp = document.getElementById('addr-cp').value;
+    const ville = document.getElementById('addr-ville').value;
+    const adresseComplete = `${rue}, ${cp} ${ville}`;
+    
+    // On sauvegarde dans Firebase
+    await db.collection('adresses').add({ email: auth.currentUser.email, adresse: adresseComplete });
+    
+    document.getElementById('form-address').reset();
+    document.getElementById('form-address').style.display = 'none';
+    document.getElementById('btn-show-address').style.display = 'block';
+    chargerAdresses();
+}
+
+function chargerAdresses() {
+    if(!auth.currentUser) return;
+    const container = document.getElementById('adresses-list');
+    container.innerHTML = 'Chargement...';
+    
+    db.collection('adresses').where('email', '==', auth.currentUser.email).get().then(snapshot => {
+        if(snapshot.empty) {
+            container.innerHTML = '<p class="empty-state">Aucune adresse enregistrée.</p>';
+        } else {
+            container.innerHTML = '';
+            snapshot.forEach(doc => {
+                container.innerHTML += `<div class="saved-item">📍 <span>${doc.data().adresse}</span></div>`;
+            });
+        }
+    });
+}
+
+// -- CARTES (Maintenant connectées à Firebase) --
 document.getElementById('btn-show-card').addEventListener('click', () => {
     document.getElementById('form-card').style.display = 'block';
     document.getElementById('btn-show-card').style.display = 'none';
 });
 
-window.sauvegarderAdresse = function(event) {
+window.sauvegarderCarte = async function(event) {
     event.preventDefault();
-    const rue = document.getElementById('addr-rue').value;
-    const cp = document.getElementById('addr-cp').value;
-    const ville = document.getElementById('addr-ville').value;
-    
-    mesAdresses.push(`${rue}, ${cp} ${ville}`);
-    document.getElementById('form-address').reset();
-    document.getElementById('form-address').style.display = 'none';
-    document.getElementById('btn-show-address').style.display = 'block';
-    afficherAdresses();
-}
+    if(!auth.currentUser) return;
 
-function afficherAdresses() {
-    const container = document.getElementById('adresses-list');
-    if (mesAdresses.length === 0) {
-        container.innerHTML = '<p class="empty-state">Aucune adresse enregistrée.</p>';
-    } else {
-        container.innerHTML = '';
-        mesAdresses.forEach(addr => {
-            container.innerHTML += `<div class="saved-item">📍 <span>${addr}</span></div>`;
-        });
-    }
-}
-
-window.sauvegarderCarte = function(event) {
-    event.preventDefault();
     const numero = document.getElementById('card-numero').value;
     const derniersChiffres = numero.slice(-4);
-    mesCartes.push(`**** **** **** ${derniersChiffres}`);
+    
+    // On sauvegarde que les 4 derniers chiffres dans Firebase
+    await db.collection('cartes').add({ email: auth.currentUser.email, chiffres: derniersChiffres });
     
     document.getElementById('form-card').reset();
     document.getElementById('form-card').style.display = 'none';
     document.getElementById('btn-show-card').style.display = 'block';
-    afficherCartes();
+    chargerCartes();
 }
 
-function afficherCartes() {
+function chargerCartes() {
+    if(!auth.currentUser) return;
     const container = document.getElementById('cartes-list');
-    if (mesCartes.length === 0) {
-        container.innerHTML = '<p class="empty-state">Aucun moyen de paiement enregistré.</p>';
-    } else {
-        container.innerHTML = '';
-        mesCartes.forEach(carte => {
-            container.innerHTML += `<div class="saved-item">💳 <span>Carte terminant par ${carte}</span></div>`;
-        });
-    }
+    container.innerHTML = 'Chargement...';
+    
+    db.collection('cartes').where('email', '==', auth.currentUser.email).get().then(snapshot => {
+        if(snapshot.empty) {
+            container.innerHTML = '<p class="empty-state">Aucun moyen de paiement enregistré.</p>';
+        } else {
+            container.innerHTML = '';
+            snapshot.forEach(doc => {
+                container.innerHTML += `<div class="saved-item">💳 <span>Carte terminant par **** ${doc.data().chiffres}</span></div>`;
+            });
+        }
+    });
+}
+
+// -- RETOURS (Maintenant connectés aux commandes) --
+function chargerRetours() {
+    const container = document.getElementById('view-retours');
+    container.innerHTML = `
+        <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+        <h3 class="montserrat" style="margin-bottom:15px;">Faire un retour</h3>
+        <p class="empty-state" id="loading-retours">Recherche des commandes éligibles...</p>
+        <div id="liste-retours"></div>
+    `;
+
+    if(!auth.currentUser) return;
+
+    db.collection('commandes').where('email', '==', auth.currentUser.email).get().then(snapshot => {
+        document.getElementById('loading-retours').style.display = 'none';
+        const liste = document.getElementById('liste-retours');
+        
+        if(snapshot.empty) {
+            liste.innerHTML = '<p class="empty-state">Tu ne peux demander un retour que si tu possèdes une commande.</p>';
+        } else {
+            let html = '';
+            snapshot.forEach(doc => {
+                const cmd = doc.data();
+                const date = cmd.date ? cmd.date.toDate().toLocaleDateString('fr-FR') : 'Récente';
+                html += `
+                    <div class="saved-item" style="justify-content: space-between;">
+                        <div>
+                            <strong>Commande du ${date}</strong><br>
+                            <span style="font-size: 0.8rem; color: #ccc;">${cmd.total} €</span>
+                        </div>
+                        <button class="btn-style" style="padding: 5px 10px; font-size: 0.8rem;" onclick="demanderRetour('${doc.id}')">Retourner</button>
+                    </div>
+                `;
+            });
+            liste.innerHTML = html;
+        }
+    });
+}
+
+window.demanderRetour = function(idCommande) {
+    alert("Ta demande de retour a été envoyée au service client ! Tu vas recevoir l'étiquette d'expédition par e-mail très vite.");
 }
 
 // ==========================================
-// 5. FORMULAIRE DE SUPPORT
+// 4. FORMULAIRE DE SUPPORT
 // ==========================================
 window.envoyerMessage = function(event) {
     event.preventDefault();
@@ -240,7 +285,7 @@ window.envoyerMessage = function(event) {
 }
 
 // ==========================================
-// 6. GESTION DU PANIER
+// 5. GESTION DU PANIER & PAIEMENT
 // ==========================================
 let panier = [];
 const cartSidebar = document.getElementById('cart-sidebar');
@@ -280,9 +325,6 @@ function mettreAJourPanier() {
     affichageTotal.innerText = total;
 }
 
-// ==========================================
-// 7. PAIEMENT ET ENREGISTREMENT FIREBASE
-// ==========================================
 const btnCheckout = document.getElementById('btn-checkout');
 
 btnCheckout.addEventListener('click', async () => {
@@ -304,7 +346,7 @@ btnCheckout.addEventListener('click', async () => {
     try {
         const totalCommande = panier.reduce((somme, article) => somme + article.prix, 0);
         
-        // Enregistrement dans Firebase AVANT le paiement Stripe
+        // Sauvegarde la commande
         await db.collection('commandes').add({
             email: auth.currentUser.email,
             articles: panier,
@@ -313,7 +355,7 @@ btnCheckout.addEventListener('click', async () => {
             statut: 'En cours de préparation'
         });
 
-        // Appel du serveur de paiement
+        // Ouvre Stripe
         const response = await fetch('/.netlify/functions/create-checkout', {
             method: 'POST',
             body: JSON.stringify({ panier: panier }),
