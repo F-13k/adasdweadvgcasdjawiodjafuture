@@ -1,9 +1,8 @@
 // ==========================================
 // 0. INITIALISATION DE STRIPE
 // ==========================================
-// ⚠️ ATTENTION : REMPLACE LA LIGNE CI-DESSOUS PAR TA VRAIE CLÉ PUBLIQUE STRIPE
+// ⚠️ ATTENTION : REMPLACE PAR TA VRAIE CLÉ PUBLIQUE STRIPE
 const stripe = Stripe('pk_test_51U6ggQH9XGzkkTIl6TOpdSkL2rzAZuhYQ6Vl48UyBrGciyVmL9j7n4QltBisAQCtbRD46FgRomg5HuFvtvR3oimy00YYh2n3h4');
-const db = firebase.firestore();
 
 // ==========================================
 // 1. CONFIGURATION FIREBASE
@@ -20,6 +19,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+const db = firebase.firestore();
 
 // ==========================================
 // 2. GESTION DE L'AUTHENTIFICATION (COMPTES)
@@ -116,7 +116,6 @@ function closeView() {
 function chargerCommandes() {
     const vueCommandes = document.getElementById('view-commandes');
     
-    // On met un texte de chargement
     vueCommandes.innerHTML = `
         <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
         <h3 class="montserrat" style="margin-bottom:15px;">Mes Commandes</h3>
@@ -126,7 +125,6 @@ function chargerCommandes() {
 
     if (!auth.currentUser) return;
 
-    // On interroge la base de données Firebase
     db.collection('commandes')
       .where('email', '==', auth.currentUser.email)
       .get()
@@ -140,12 +138,10 @@ function chargerCommandes() {
           }
 
           let html = '';
-          // On liste chaque commande trouvée
           querySnapshot.forEach((doc) => {
               const cmd = doc.data();
               const date = cmd.date ? cmd.date.toDate().toLocaleDateString('fr-FR') : 'Récente';
               
-              // Design d'une commande
               html += `
                 <div class="saved-item" style="flex-direction: column; align-items: flex-start;">
                     <div style="width: 100%; display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px;">
@@ -285,7 +281,7 @@ function mettreAJourPanier() {
 }
 
 // ==========================================
-// 7. PAIEMENT AVEC STRIPE
+// 7. PAIEMENT ET ENREGISTREMENT FIREBASE
 // ==========================================
 const btnCheckout = document.getElementById('btn-checkout');
 
@@ -295,12 +291,29 @@ btnCheckout.addEventListener('click', async () => {
         return;
     }
 
-    // Fait patienter l'utilisateur pendant que le serveur travaille
+    if (!auth.currentUser) {
+        alert("Tu dois être connecté à ton compte pour commander !");
+        cartSidebar.classList.remove('active');
+        authSidebar.classList.add('active');
+        return;
+    }
+
     btnCheckout.innerText = "CHARGEMENT...";
     btnCheckout.disabled = true;
 
     try {
-        // Appelle notre fichier backend Netlify (celui dans le dossier /netlify/functions)
+        const totalCommande = panier.reduce((somme, article) => somme + article.prix, 0);
+        
+        // Enregistrement dans Firebase AVANT le paiement Stripe
+        await db.collection('commandes').add({
+            email: auth.currentUser.email,
+            articles: panier,
+            total: totalCommande,
+            date: firebase.firestore.FieldValue.serverTimestamp(),
+            statut: 'En cours de préparation'
+        });
+
+        // Appel du serveur de paiement
         const response = await fetch('/.netlify/functions/create-checkout', {
             method: 'POST',
             body: JSON.stringify({ panier: panier }),
@@ -308,18 +321,16 @@ btnCheckout.addEventListener('click', async () => {
 
         const data = await response.json();
 
-        // Redirection vers la page de paiement Stripe
         if (data.url) {
             window.location.href = data.url;
         } else {
-            alert("Erreur lors de la création du paiement.");
-            console.error(data);
+            alert("Erreur de paiement.");
             btnCheckout.innerText = "VALIDER LA COMMANDE";
             btnCheckout.disabled = false;
         }
     } catch (error) {
-        console.error("Erreur de connexion au serveur:", error);
-        alert("Impossible de contacter le serveur de paiement.");
+        console.error("Erreur globale:", error);
+        alert("Erreur lors de la validation de la commande.");
         btnCheckout.innerText = "VALIDER LA COMMANDE";
         btnCheckout.disabled = false;
     }
