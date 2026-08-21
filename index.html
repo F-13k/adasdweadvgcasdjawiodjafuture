@@ -6,74 +6,62 @@
     <title>FUTURE | It's only the beginning</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,900;1,900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        /* === PARAMÈTRES DE BASE === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Roboto', sans-serif; background-color: #0a0a0a; color: #ffffff; overflow-x: hidden; }
         h1, h2, h3, .montserrat { font-family: 'Montserrat', sans-serif; text-transform: uppercase; }
         a { text-decoration: none; color: #ffffff; transition: 0.3s; }
         ul { list-style: none; }
 
-        /* === EN-TÊTE === */
         header { position: fixed; top: 0; width: 100%; padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid #222; }
         .logo img { height: 40px; }
         nav ul { display: flex; gap: 30px; align-items: center; }
         nav a { font-weight: 500; font-size: 0.9rem; letter-spacing: 2px; }
         nav a:hover { color: #aaa; }
         .btn-style { background: #fff; color: #000; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; border: none; font-family: 'Roboto', sans-serif; font-size: 0.9rem; letter-spacing: 1px;}
-        .btn-style:hover { background: #ccc; }
-
-        /* === HERO & COLLECTION === */
+        
         .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(10,10,10,1)), url('hero_background.jpg') center/cover; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .hero h1 { font-size: 6rem; font-style: italic; font-weight: 900; letter-spacing: 4px; }
         .hero p { font-size: 1.5rem; margin-bottom: 40px; color: #ccc; }
         
         .collection { padding: 100px 50px; text-align: center; }
         .collection h2 { font-size: 3rem; margin-bottom: 60px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; }
         .card { background: #141414; padding: 20px; border-radius: 15px; text-align: left; transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); }
         .card img { width: 100%; height: 350px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; }
         .btn-buy { background: transparent; border: 1px solid #555; color: #fff; width: 100%; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.3s; font-family: 'Roboto', sans-serif; }
         .btn-buy:hover { background: #fff; color: #000; }
+        .select-taille { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #444; border-radius: 5px; margin-bottom: 15px; font-family: 'Roboto'; cursor: pointer; }
 
-        /* === FAQ & FOOTER === */
-        .faq { max-width: 800px; margin: 50px auto; padding: 50px 20px; }
-        .faq h2 { text-align: center; font-size: 2.5rem; margin-bottom: 40px; }
-        details { background: #141414; margin-bottom: 15px; padding: 15px 20px; border-radius: 8px; cursor: pointer; }
-        summary { font-weight: bold; font-size: 1.1rem; outline: none; }
-        details p { margin-top: 15px; color: #aaa; line-height: 1.5; }
-        
-        footer { text-align: center; padding: 50px 20px; border-top: 1px solid #222; }
-        .insta-link { display: inline-block; margin: 20px 0; font-size: 1.2rem; font-weight: bold; color: #fff; }
-
-        /* === PANIER LATÉRAL === */
         #cart-sidebar { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: #111; z-index: 2000; padding: 30px; transition: 0.4s; border-left: 1px solid #333; overflow-y: auto; }
         #cart-sidebar.active { right: 0; }
         .close-cart { cursor: pointer; font-size: 1.5rem; text-align: right; margin-bottom: 20px; }
-        .cart-item { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .cart-total { font-size: 1.5rem; font-weight: bold; margin-top: 30px; text-align: right; }
-
-        /* === PANNEAU LATÉRAL : COMPTE === */
+        .cart-item { display: flex; flex-direction: column; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        
         #auth-sidebar { position: fixed; top: 0; left: -400px; width: 400px; height: 100vh; background: #111; z-index: 2000; padding: 30px; transition: 0.4s; border-right: 1px solid #333; overflow-y: auto; }
         #auth-sidebar.active { left: 0; }
-        .close-auth { cursor: pointer; font-size: 1.5rem; text-align: left; margin-bottom: 20px; display: block; }
+        .close-auth { cursor: pointer; font-size: 1.5rem; text-align: left; margin-bottom: 20px; }
         
         .auth-content input, .auth-content textarea, .dashboard-view input { width: 100%; padding: 12px; margin-bottom: 10px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; font-family: 'Roboto', sans-serif; }
         .auth-switch { color: #888; cursor: pointer; font-size: 0.9rem; text-decoration: underline; margin-top: 15px; display: inline-block;}
-        .auth-switch:hover { color: #fff; }
         
-        /* Menu Espace Client */
         .dashboard-menu { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
-        .dashboard-menu button { display: block; width: 100%; text-align: left; background: transparent; border: none; color: #aaa; padding: 15px 0; font-size: 1rem; cursor: pointer; transition: 0.3s; font-family: 'Roboto', sans-serif; border-bottom: 1px solid #222;}
-        .dashboard-menu button:hover { color: #fff; padding-left: 10px; }
-        
-        /* Sous-pages de l'espace client */
+        .dashboard-menu button { display: block; width: 100%; text-align: left; background: transparent; border: none; color: #aaa; padding: 15px 0; font-size: 1rem; cursor: pointer; transition: 0.3s; border-bottom: 1px solid #222;}
         .dashboard-view { display: none; margin-top: 20px; }
         .dashboard-view.active { display: block; }
         .btn-back { background: transparent; border: none; color: #888; cursor: pointer; font-size: 0.9rem; margin-bottom: 20px; }
-        .btn-back:hover { color: #fff; }
         .empty-state { color: #888; font-style: italic; margin-bottom: 15px; font-size: 0.9rem; }
         .saved-item { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
+
+        /* === ADAPTATION POUR TÉLÉPHONE (RESPONSIVE) === */
+        @media (max-width: 768px) {
+            header { padding: 15px; flex-direction: column; gap: 15px; }
+            nav ul { justify-content: center; gap: 15px; flex-wrap: wrap; }
+            .hero h1 { font-size: 3.5rem; }
+            .hero p { font-size: 1.2rem; padding: 0 20px; }
+            .collection { padding: 120px 20px 50px 20px; } /* Marge en haut pour le header plus grand */
+            #cart-sidebar { width: 100%; right: -100%; border-left: none; }
+            #auth-sidebar { width: 100%; left: -100%; border-right: none; }
+        }
     </style>
 </head>
 <body>
@@ -100,40 +88,61 @@
             <div class="card">
                 <img src="product_tshirt.jpg" alt="T-Shirt">
                 <h3>T-Shirt "The Beginning"</h3>
-                <p>35,00 €</p>
-                <button class="btn-buy" onclick="ajouterAuPanier('T-Shirt The Beginning', 35)">AJOUTER AU PANIER</button>
+                <p style="margin-bottom: 10px;">35,00 €</p>
+                <!-- CHOIX DES TAILLES -->
+                <select id="taille-tshirt" class="select-taille">
+                    <option value="S">Taille S</option><option value="M">Taille M</option><option value="L">Taille L</option><option value="XL">Taille XL</option>
+                </select>
+                <button class="btn-buy" onclick="ajouterAuPanier('T-Shirt The Beginning', 35, document.getElementById('taille-tshirt').value)">AJOUTER AU PANIER</button>
             </div>
+            
             <div class="card">
                 <img src="product_jacket.jpg" alt="Veste">
                 <h3>Track Jacket</h3>
-                <p>75,00 €</p>
-                <button class="btn-buy" onclick="ajouterAuPanier('Track Jacket', 75)">AJOUTER AU PANIER</button>
+                <p style="margin-bottom: 10px;">75,00 €</p>
+                <select id="taille-veste" class="select-taille">
+                    <option value="S">Taille S</option><option value="M">Taille M</option><option value="L">Taille L</option><option value="XL">Taille XL</option>
+                </select>
+                <button class="btn-buy" onclick="ajouterAuPanier('Track Jacket', 75, document.getElementById('taille-veste').value)">AJOUTER AU PANIER</button>
             </div>
+            
             <div class="card">
                 <img src="product_puffer.jpg" alt="Doudoune">
                 <h3>Doudoune Glossy</h3>
-                <p>120,00 €</p>
-                <button class="btn-buy" onclick="ajouterAuPanier('Doudoune Glossy', 120)">AJOUTER AU PANIER</button>
+                <p style="margin-bottom: 10px;">120,00 €</p>
+                <select id="taille-doudoune" class="select-taille">
+                    <option value="S">Taille S</option><option value="M">Taille M</option><option value="L">Taille L</option><option value="XL">Taille XL</option>
+                </select>
+                <button class="btn-buy" onclick="ajouterAuPanier('Doudoune Glossy', 120, document.getElementById('taille-doudoune').value)">AJOUTER AU PANIER</button>
             </div>
         </div>
     </section>
 
-    <!-- PANIER LATÉRAL (DROITE) -->
+    <!-- PANIER LATÉRAL -->
     <div id="cart-sidebar">
         <div class="close-cart" id="close-cart-btn">✖</div>
         <h2 class="montserrat" style="margin-bottom: 20px;">Ton Panier</h2>
+        
         <div id="cart-items"><p style="color: #aaa;">Ton panier est vide.</p></div>
-        <div class="cart-total">Total: <span id="total-price">0</span> €</div>
-        <!-- BOUTON STRIPE AVEC SON ID -->
+        
+        <!-- SECTION CODE PROMO -->
+        <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
+            <p style="font-size: 0.9rem; margin-bottom: 5px;">Code Promo :</p>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="input-promo" placeholder="Ex: FUTURE20" style="flex: 1; padding: 10px; background: #000; color: #fff; border: 1px solid #444; border-radius: 5px;">
+                <button class="btn-style" onclick="appliquerPromo()" style="padding: 10px;">APPLIQUER</button>
+            </div>
+            <p id="promo-msg" style="font-size: 0.8rem; margin-top: 5px; color: #4CAF50;"></p>
+        </div>
+
+        <div class="cart-total" style="font-size: 1.2rem; margin-top: 20px; text-align: right;" id="zone-total">Total: 0 €</div>
         <button class="btn-buy" id="btn-checkout" style="margin-top: 20px; background: #fff; color: #000;">VALIDER LA COMMANDE</button>
     </div>
 
-    <!-- PANNEAU LATÉRAL : COMPTE (GAUCHE) -->
+    <!-- PANNEAU LATÉRAL : COMPTE -->
     <div id="auth-sidebar">
         <div class="close-auth" id="close-auth">✖</div>
-        
         <div class="auth-content">
-            <!-- PAGE CONNEXION / INSCRIPTION -->
             <div id="section-login">
                 <h2 class="montserrat" id="auth-title" style="margin-bottom: 20px;">CONNEXION</h2>
                 <input type="email" id="email-input" placeholder="Adresse e-mail">
@@ -142,13 +151,11 @@
                 <p class="auth-switch" id="toggle-auth-mode">Pas de compte ? Créer un compte</p>
             </div>
 
-            <!-- ESPACE CLIENT (MENU PRINCIPAL) -->
             <div id="section-dashboard" style="display: none;">
                 <h2 class="montserrat" style="margin-bottom: 10px;">MON ESPACE</h2>
                 <p style="color: #aaa; font-size: 0.8rem; margin-bottom: 20px;" id="user-email"></p>
-                
                 <div class="dashboard-menu">
-                    <!-- LE BOUTON SECRET (Caché par défaut) -->
+                    <!-- BOUTON PATRON -->
                     <button id="btn-admin-menu" onclick="openView('view-admin')" style="display: none; color: #fff; background: #222; border-radius: 5px; margin-bottom: 15px; border: 1px solid #555;">👑 ESPACE PATRON</button>
                     
                     <button onclick="openView('view-commandes')">📦 Mes Commandes</button>
@@ -156,43 +163,33 @@
                     <button onclick="openView('view-paiement')">💳 Moyens de paiement</button>
                     <button onclick="openView('view-retours')">🔄 Demander un retour</button>
                     <button onclick="openView('view-support')">💬 Support Client</button>
-                    <button onclick="openView('view-parametres')">⚙️ Paramètres du compte</button>
                 </div>
-
                 <button class="btn-buy" id="btn-logout" style="background: transparent; border: 1px solid #444; color: #fff; margin-top: 40px;">SE DÉCONNECTER</button>
             </div>
 
-            <!-- SOUS-PAGES DE L'ESPACE CLIENT -->
             <div id="views-container">
-                
-                <!-- Vue: Espace Admin Secret -->
+                <!-- VUE ADMIN PATRON -->
                 <div id="view-admin" class="dashboard-view">
                     <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
                     <h3 class="montserrat" style="margin-bottom:15px; color: #fff;">ESPACE PATRON</h3>
                     
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px;">
-                        <button class="btn-style" onclick="chargerAdminCommandes()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Commandes</button>
-                        <button class="btn-style" onclick="chargerAdminRetours()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Retours</button>
-                        <button class="btn-style" onclick="chargerAdminSupport()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Support</button>
+                        <button class="btn-style" onclick="chargerAdminCommandes()" style="background: #333; color: #fff; border: 1px solid #555;">Commandes</button>
+                        <button class="btn-style" onclick="chargerAdminRetours()" style="background: #333; color: #fff; border: 1px solid #555;">Retours</button>
+                        <button class="btn-style" onclick="chargerAdminSupport()" style="background: #333; color: #fff; border: 1px solid #555;">Support</button>
+                        <button class="btn-style" onclick="chargerAdminPromos()" style="background: #333; color: #fff; border: 1px solid #555;">Promos</button>
                     </div>
-
-                    <div id="admin-content">
-                        <p class="empty-state">Sélectionne une catégorie ci-dessus.</p>
-                    </div>
+                    <div id="admin-content"><p class="empty-state">Sélectionne une catégorie ci-dessus.</p></div>
                 </div>
 
-                <!-- Vue: Commandes -->
-                <div id="view-commandes" class="dashboard-view">
-                    <!-- Injecté par JS -->
-                </div>
-
-                <!-- Vue: Adresses -->
+                <div id="view-commandes" class="dashboard-view"></div>
+                
                 <div id="view-adresses" class="dashboard-view">
-                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+                    <button class="btn-back" onclick="closeView()">⬅ Retour</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Mes Adresses</h3>
-                    <div id="adresses-list"><p class="empty-state">Aucune adresse enregistrée.</p></div>
-                    <button class="btn-buy" id="btn-show-address" style="border-color:#444; margin-bottom: 15px; margin-top: 15px;">+ Ajouter une adresse</button>
-                    <form id="form-address" style="display: none;" onsubmit="sauvegarderAdresse(event)">
+                    <div id="adresses-list"></div>
+                    <button class="btn-buy" id="btn-show-address" style="margin-top:15px;">+ Ajouter</button>
+                    <form id="form-address" style="display:none;" onsubmit="sauvegarderAdresse(event)">
                         <input type="text" id="addr-rue" placeholder="Numéro et rue" required>
                         <input type="text" id="addr-cp" placeholder="Code postal" required>
                         <input type="text" id="addr-ville" placeholder="Ville" required>
@@ -200,84 +197,51 @@
                     </form>
                 </div>
 
-                <!-- Vue: Paiement -->
                 <div id="view-paiement" class="dashboard-view">
-                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+                    <button class="btn-back" onclick="closeView()">⬅ Retour</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Moyens de paiement</h3>
-                    <div id="cartes-list"><p class="empty-state">Aucun moyen de paiement enregistré.</p></div>
-                    <button class="btn-buy" id="btn-show-card" style="border-color:#444; margin-bottom: 15px; margin-top: 15px;">+ Ajouter une carte</button>
-                    <form id="form-card" style="display: none;" onsubmit="sauvegarderCarte(event)">
-                        <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">(Sécurisé par Stripe)</p>
-                        <input type="text" id="card-numero" placeholder="Numéro de carte (ex: 4242 4242...)" maxlength="16" required>
+                    <div id="cartes-list"></div>
+                    <button class="btn-buy" id="btn-show-card" style="margin-top:15px;">+ Ajouter</button>
+                    <form id="form-card" style="display:none;" onsubmit="sauvegarderCarte(event)">
+                        <input type="text" id="card-numero" placeholder="Numéro de carte (ex: 4242...)" maxlength="16" required>
                         <button type="submit" class="btn-buy" style="background:#fff; color:#000;">ENREGISTRER</button>
                     </form>
                 </div>
 
-                <!-- Vue: Retours -->
-                <div id="view-retours" class="dashboard-view">
-                    <!-- Injecté par JS -->
-                </div>
+                <div id="view-retours" class="dashboard-view"></div>
 
-                <!-- Vue: Paramètres -->
-                <div id="view-parametres" class="dashboard-view">
-                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
-                    <h3 class="montserrat" style="margin-bottom:15px;">Paramètres</h3>
-                    <input type="text" placeholder="Prénom">
-                    <input type="text" placeholder="Nom">
-                    <button class="btn-buy" style="background:#fff; color:#000;">METTRE À JOUR</button>
-                </div>
-
-                <!-- Vue: Support (NOUVEAU DESIGN MESSAGERIE) -->
+                <!-- SUPPORT -->
                 <div id="view-support" class="dashboard-view">
-                    <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+                    <button class="btn-back" onclick="closeView()">⬅ Retour</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Support Client</h3>
-                    
-                    <!-- Liste des conversations -->
-                    <div id="support-tickets-list">
-                        <p class="empty-state">Chargement de tes tickets...</p>
-                    </div>
-
-                    <button class="btn-buy" id="btn-show-ticket-form" style="border-color:#444; margin-bottom: 15px; margin-top: 20px;" onclick="afficherFormulaireTicket()">+ Nouvelle Demande</button>
-
-                    <!-- Formulaire de création de ticket -->
+                    <div id="support-tickets-list"></div>
+                    <button class="btn-buy" id="btn-show-ticket-form" style="margin-top: 15px;" onclick="afficherFormulaireTicket()">+ Nouvelle Demande</button>
                     <form id="form-support" style="display: none;" onsubmit="creerNouveauTicket(event)">
-                        <input type="text" id="sujet-support" placeholder="Sujet de ta demande" required>
-                        <textarea id="message-support" placeholder="Explique-nous ton problème..." rows="5" required></textarea>
+                        <input type="text" id="sujet-support" placeholder="Sujet" required>
+                        <textarea id="message-support" placeholder="Message..." rows="5" required></textarea>
                         <div style="display: flex; gap: 10px;">
-                            <button type="button" class="btn-buy" style="background: transparent; color: #fff; border-color: #444;" onclick="cacherFormulaireTicket()">ANNULER</button>
+                            <button type="button" class="btn-buy" onclick="cacherFormulaireTicket()">ANNULER</button>
                             <button type="submit" class="btn-buy" style="background:#fff; color:#000;">ENVOYER</button>
                         </div>
                     </form>
-
-                    <!-- L'intérieur d'une conversation (caché par défaut) -->
-                    <div id="support-conversation" style="display: none; margin-top: 20px; background: #141414; padding: 15px; border-radius: 8px; border: 1px solid #333;">
-                        <button class="btn-back" onclick="fermerConversation()" style="margin-bottom: 10px;">⬅ Retour à la liste</button>
+                    <div id="support-conversation" style="display: none; margin-top: 20px; background: #141414; padding: 15px; border-radius: 8px;">
+                        <button class="btn-back" onclick="fermerConversation()" style="margin-bottom: 10px;">⬅ Retour</button>
                         <h4 id="conv-sujet" style="margin-bottom: 15px; color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px;">Sujet</h4>
-                        
-                        <!-- Ici on injectera les bulles de chat -->
-                        <div id="conv-messages" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
-                        </div>
-                        
+                        <div id="conv-messages" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;"></div>
                         <div id="conv-reply-box" style="display: flex; flex-direction: column; gap: 10px;">
-                            <textarea id="reply-support-client" placeholder="Écrire un message..." rows="2" style="width: 100%; padding: 12px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; resize: none;"></textarea>
-                            <button class="btn-buy" style="background:#fff; color:#000; padding: 10px;" onclick="repondreAuTicket()">ENVOYER LA RÉPONSE</button>
+                            <textarea id="reply-support-client" placeholder="Message..." rows="2" style="padding: 12px; background: #000; color: #fff; border: 1px solid #444; border-radius: 5px;"></textarea>
+                            <button class="btn-buy" style="background:#fff; color:#000;" onclick="repondreAuTicket()">RÉPONDRE</button>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT STRIPE OFFICIEL (Très important) -->
     <script src="https://js.stripe.com/v3/"></script>
-
-    <!-- SCRIPTS FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    
-    <!-- NOTRE SCRIPT -->
     <script src="script.js"></script>
 
 </body>
