@@ -26,6 +26,7 @@
         .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(10,10,10,1)), url('hero_background.jpg') center/cover; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .hero h1 { font-size: 6rem; font-style: italic; font-weight: 900; letter-spacing: 4px; }
         .hero p { font-size: 1.5rem; margin-bottom: 40px; color: #ccc; }
+        
         .collection { padding: 100px 50px; text-align: center; }
         .collection h2 { font-size: 3rem; margin-bottom: 60px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; }
@@ -41,6 +42,7 @@
         details { background: #141414; margin-bottom: 15px; padding: 15px 20px; border-radius: 8px; cursor: pointer; }
         summary { font-weight: bold; font-size: 1.1rem; outline: none; }
         details p { margin-top: 15px; color: #aaa; line-height: 1.5; }
+        
         footer { text-align: center; padding: 50px 20px; border-top: 1px solid #222; }
         .insta-link { display: inline-block; margin: 20px 0; font-size: 1.2rem; font-weight: bold; color: #fff; }
 
@@ -65,14 +67,12 @@
         .dashboard-menu button { display: block; width: 100%; text-align: left; background: transparent; border: none; color: #aaa; padding: 15px 0; font-size: 1rem; cursor: pointer; transition: 0.3s; font-family: 'Roboto', sans-serif; border-bottom: 1px solid #222;}
         .dashboard-menu button:hover { color: #fff; padding-left: 10px; }
         
-        /* Les sous-pages de l'espace client */
+        /* Sous-pages de l'espace client */
         .dashboard-view { display: none; margin-top: 20px; }
         .dashboard-view.active { display: block; }
         .btn-back { background: transparent; border: none; color: #888; cursor: pointer; font-size: 0.9rem; margin-bottom: 20px; }
         .btn-back:hover { color: #fff; }
         .empty-state { color: #888; font-style: italic; margin-bottom: 15px; font-size: 0.9rem; }
-        
-        /* Design des éléments sauvegardés (adresse, carte) */
         .saved-item { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
     </style>
 </head>
@@ -124,7 +124,8 @@
         <h2 class="montserrat" style="margin-bottom: 20px;">Ton Panier</h2>
         <div id="cart-items"><p style="color: #aaa;">Ton panier est vide.</p></div>
         <div class="cart-total">Total: <span id="total-price">0</span> €</div>
-        <button class="btn-buy" style="margin-top: 20px; background: #fff; color: #000;">VALIDER LA COMMANDE</button>
+        <!-- BOUTON STRIPE AVEC SON ID -->
+        <button class="btn-buy" id="btn-checkout" style="margin-top: 20px; background: #fff; color: #000;">VALIDER LA COMMANDE</button>
     </div>
 
     <!-- PANNEAU LATÉRAL : COMPTE (GAUCHE) -->
@@ -173,9 +174,7 @@
                     <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Mes Adresses</h3>
                     
-                    <div id="adresses-list">
-                        <p class="empty-state">Aucune adresse enregistrée.</p>
-                    </div>
+                    <div id="adresses-list"><p class="empty-state">Aucune adresse enregistrée.</p></div>
 
                     <button class="btn-buy" id="btn-show-address" style="border-color:#444; margin-bottom: 15px;">+ Ajouter une adresse</button>
                     
@@ -192,9 +191,7 @@
                     <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Moyens de paiement</h3>
                     
-                    <div id="cartes-list">
-                        <p class="empty-state">Aucun moyen de paiement enregistré.</p>
-                    </div>
+                    <div id="cartes-list"><p class="empty-state">Aucun moyen de paiement enregistré.</p></div>
 
                     <button class="btn-buy" id="btn-show-card" style="border-color:#444; margin-bottom: 15px;">+ Ajouter une carte</button>
                     
@@ -214,7 +211,7 @@
                 <div id="view-retours" class="dashboard-view">
                     <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Faire un retour</h3>
-                    <p class="empty-state">Tu ne peux demander un retour que si tu possèdes une commande éligible. (Aucune commande trouvée).</p>
+                    <p class="empty-state">Tu ne peux demander un retour que si tu possèdes une commande éligible.</p>
                 </div>
 
                 <!-- Vue: Paramètres -->
@@ -236,14 +233,18 @@
                         <button type="submit" class="btn-buy" style="background:#fff; color:#000;">ENVOYER LE MESSAGE</button>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- Firebase Classique -->
+    <!-- SCRIPT STRIPE OFFICIEL (Très important) -->
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <!-- SCRIPTS FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    
+    <!-- NOTRE SCRIPT -->
     <script src="script.js"></script>
 
 </body>
