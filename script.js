@@ -1,4 +1,4 @@
-// --- CONFIGURATION FIREBASE CLASSIQUE ---
+// --- CONFIGURATION FIREBASE ---
 const firebaseConfig = {
   apiKey: "AIzaSyCRiUSyocGDUNaGN7cAgbVJAXGDBFt0v5c",
   authDomain: "future-be1d6.firebaseapp.com",
@@ -31,7 +31,7 @@ const sectionDashboard = document.getElementById('section-dashboard');
 const userEmailDisplay = document.getElementById('user-email');
 const btnLogout = document.getElementById('btn-logout');
 
-// Ouvrir / Fermer
+// Ouvrir / Fermer le panneau compte
 btnCompte.addEventListener('click', () => { authSidebar.classList.add('active'); });
 closeAuth.addEventListener('click', () => { authSidebar.classList.remove('active'); });
 
@@ -49,7 +49,7 @@ toggleAuthMode.addEventListener('click', () => {
     }
 });
 
-// Valider Auth
+// Valider Connexion/Inscription
 btnSubmitAuth.addEventListener('click', () => {
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -85,26 +85,14 @@ auth.onAuthStateChanged((user) => {
 // ==========================================
 // 2. NAVIGATION DANS LE PANNEAU CLIENT
 // ==========================================
-
-// Fonction pour ouvrir une sous-page
 function openView(viewId) {
-    // 1. Cacher le menu principal
     sectionDashboard.style.display = "none";
-    // 2. Cacher toutes les autres vues au cas où
-    document.querySelectorAll('.dashboard-view').forEach(view => {
-        view.classList.remove('active');
-    });
-    // 3. Afficher la vue demandée
+    document.querySelectorAll('.dashboard-view').forEach(view => view.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
 }
 
-// Fonction pour faire "Retour" et revoir le menu principal
 function closeView() {
-    // Cacher toutes les vues
-    document.querySelectorAll('.dashboard-view').forEach(view => {
-        view.classList.remove('active');
-    });
-    // Réafficher le menu si on est connecté, sinon la page login
+    document.querySelectorAll('.dashboard-view').forEach(view => view.classList.remove('active'));
     if (auth.currentUser) {
         sectionDashboard.style.display = "block";
     } else {
@@ -113,24 +101,96 @@ function closeView() {
 }
 
 // ==========================================
-// 3. FORMULAIRE DE SUPPORT
+// 3. GESTION DES ADRESSES ET CARTES
 // ==========================================
-function envoyerMessage(event) {
-    event.preventDefault(); // Empêche la page de se recharger
+let mesAdresses = [];
+let mesCartes = [];
+
+// Afficher les formulaires quand on clique sur le bouton "+"
+document.getElementById('btn-show-address').addEventListener('click', () => {
+    document.getElementById('form-address').style.display = 'block';
+    document.getElementById('btn-show-address').style.display = 'none';
+});
+
+document.getElementById('btn-show-card').addEventListener('click', () => {
+    document.getElementById('form-card').style.display = 'block';
+    document.getElementById('btn-show-card').style.display = 'none';
+});
+
+// Enregistrer une adresse
+window.sauvegarderAdresse = function(event) {
+    event.preventDefault(); // Empêche la page de sauter
+    const rue = document.getElementById('addr-rue').value;
+    const cp = document.getElementById('addr-cp').value;
+    const ville = document.getElementById('addr-ville').value;
     
-    // Le code ci-dessous simule l'envoi. 
-    // Plus tard, on connectera ça à un service d'envoi d'emails pro (ex: Formspree)
-    alert("Ton message a bien été envoyé au support (fefesimcer@gmail.com) ! Nous te répondrons sous 24h.");
+    // On ajoute l'adresse à la liste
+    mesAdresses.push(`${rue}, ${cp} ${ville}`);
     
-    // On vide les champs après envoi
-    document.getElementById('sujet-support').value = "";
-    document.getElementById('message-support').value = "";
-    closeView(); // Retour au menu
+    // On nettoie et cache le formulaire
+    document.getElementById('form-address').reset();
+    document.getElementById('form-address').style.display = 'none';
+    document.getElementById('btn-show-address').style.display = 'block';
+    
+    // On met à jour l'affichage
+    afficherAdresses();
+}
+
+function afficherAdresses() {
+    const container = document.getElementById('adresses-list');
+    if (mesAdresses.length === 0) {
+        container.innerHTML = '<p class="empty-state">Aucune adresse enregistrée.</p>';
+    } else {
+        container.innerHTML = '';
+        mesAdresses.forEach(addr => {
+            container.innerHTML += `<div class="saved-item">📍 <span>${addr}</span></div>`;
+        });
+    }
+}
+
+// Enregistrer une carte
+window.sauvegarderCarte = function(event) {
+    event.preventDefault();
+    const numero = document.getElementById('card-numero').value;
+    
+    // Pour la sécurité, on ne garde que les 4 derniers chiffres
+    const derniersChiffres = numero.slice(-4);
+    mesCartes.push(`**** **** **** ${derniersChiffres}`);
+    
+    document.getElementById('form-card').reset();
+    document.getElementById('form-card').style.display = 'none';
+    document.getElementById('btn-show-card').style.display = 'block';
+    
+    afficherCartes();
+}
+
+function afficherCartes() {
+    const container = document.getElementById('cartes-list');
+    if (mesCartes.length === 0) {
+        container.innerHTML = '<p class="empty-state">Aucun moyen de paiement enregistré.</p>';
+    } else {
+        container.innerHTML = '';
+        mesCartes.forEach(carte => {
+            container.innerHTML += `<div class="saved-item">💳 <span>Carte terminant par ${carte}</span></div>`;
+        });
+    }
 }
 
 
 // ==========================================
-// 4. GESTION DU PANIER
+// 4. FORMULAIRE DE SUPPORT
+// ==========================================
+window.envoyerMessage = function(event) {
+    event.preventDefault();
+    alert("Ton message a bien été envoyé au support (fefesimcer@gmail.com) ! Nous te répondrons sous 24h.");
+    document.getElementById('sujet-support').value = "";
+    document.getElementById('message-support').value = "";
+    closeView();
+}
+
+
+// ==========================================
+// 5. GESTION DU PANIER
 // ==========================================
 let panier = [];
 const cartSidebar = document.getElementById('cart-sidebar');
@@ -140,7 +200,7 @@ const closeCartBtn = document.getElementById('close-cart-btn');
 btnPanier.addEventListener('click', () => { cartSidebar.classList.add('active'); });
 closeCartBtn.addEventListener('click', () => { cartSidebar.classList.remove('active'); });
 
-function ajouterAuPanier(nom, prix) {
+window.ajouterAuPanier = function(nom, prix) {
     panier.push({ nom: nom, prix: prix });
     mettreAJourPanier();
     cartSidebar.classList.add('active');
