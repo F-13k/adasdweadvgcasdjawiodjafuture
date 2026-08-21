@@ -97,7 +97,6 @@ auth.onAuthStateChanged((user) => {
         sectionDashboard.style.display = "block";
         document.getElementById('user-email').innerText = user.email;
         
-        // AFFICHAGE DU BOUTON PATRON SI C'EST TOI
         if(user.email === ADMIN_EMAIL) {
             document.getElementById('btn-admin-menu').style.display = 'block';
         } else {
@@ -187,7 +186,6 @@ window.demanderRetour = async function(idCommande, email) {
     afficherNotification("Demande de retour envoyée !");
 }
 
-// ADRESSES ET CARTES (Simplifiés)
 document.getElementById('btn-show-address').addEventListener('click', () => { document.getElementById('form-address').style.display = 'block'; document.getElementById('btn-show-address').style.display = 'none'; });
 window.sauvegarderAdresse = async function(e) { e.preventDefault(); await db.collection('adresses').add({ email: auth.currentUser.email, adresse: `${document.getElementById('addr-rue').value}, ${document.getElementById('addr-cp').value} ${document.getElementById('addr-ville').value}` }); document.getElementById('form-address').reset(); document.getElementById('form-address').style.display='none'; document.getElementById('btn-show-address').style.display='block'; chargerAdresses(); afficherNotification("Adresse sauvegardée"); }
 function chargerAdresses() { db.collection('adresses').where('email','==',auth.currentUser.email).get().then(snap => { let h=''; snap.forEach(doc => h+=`<div class="saved-item">📍 <span>${doc.data().adresse}</span></div>`); document.getElementById('adresses-list').innerHTML = h||'<p class="empty-state">Aucune adresse.</p>'; }); }
@@ -238,14 +236,14 @@ window.chargerSupportClient = () => {
     document.getElementById('support-tickets-list').style.display = 'block';
     document.getElementById('btn-show-ticket-form').style.display = 'block';
     
-    db.collection('support').where('email', '==', auth.currentUser.email).get().then(snap => {
+    db.collection('support').where('email', '==', auth.currentUser.email).orderBy('dateMAJ', 'desc').get().then(snap => {
         const liste = document.getElementById('support-tickets-list');
         if(snap.empty) return liste.innerHTML = '<p class="empty-state">Tu n\'as aucune demande en cours.</p>';
         
         let html = '';
         snap.forEach(doc => {
             const ticket = doc.data();
-            let color = ticket.statut === 'Répondu' ? '#4CAF50' : '#FF9800';
+            let color = ticket.statut === 'Répondu' ? '#4CAF50' : (ticket.statut === 'Clôturé' ? '#f44336' : '#FF9800');
             html += `
                 <div class="saved-item" style="justify-content: space-between; cursor: pointer;" onclick="ouvrirConversation('${doc.id}')">
                     <div>
@@ -286,6 +284,28 @@ window.ouvrirConversation = async (ticketId) => {
             </div>
         `;
     });
+    
+    // Si le ticket est clôturé, on masque la zone de réponse et on affiche un message
+    if (ticket.statut === 'Clôturé') {
+        htmlMsg += `<div style="align-self: center; color: #f44336; font-size: 0.8rem; margin-top: 10px; font-weight: bold;">🔒 Ce ticket est clôturé.</div>`;
+        document.getElementById('conv-reply-box').style.display = 'none';
+        // On supprime le bouton clôturer s'il était là
+        const closeBtn = document.getElementById('btn-close-ticket-client');
+        if (closeBtn) closeBtn.remove();
+    } else {
+        document.getElementById('conv-reply-box').style.display = 'flex';
+        // Ajout du bouton Clôturer pour le client
+        if (!document.getElementById('btn-close-ticket-client')) {
+            const btnClose = document.createElement('button');
+            btnClose.id = 'btn-close-ticket-client';
+            btnClose.className = 'btn-style';
+            btnClose.style.cssText = 'background: #f44336; color: #fff; padding: 10px; border: none; margin-top: 5px; cursor: pointer; border-radius: 5px;';
+            btnClose.innerText = '🔒 CLÔTURER CE TICKET';
+            btnClose.onclick = () => fermerTicket(ticketId, 'client');
+            document.getElementById('conv-reply-box').appendChild(btnClose);
+        }
+    }
+    
     document.getElementById('conv-messages').innerHTML = htmlMsg;
 }
 
@@ -302,7 +322,25 @@ window.repondreAuTicket = async () => {
     });
     
     document.getElementById('reply-support-client').value = '';
-    ouvrirConversation(currentTicketId); // Recharge les messages
+    ouvrirConversation(currentTicketId);
+}
+
+// Fonction globale pour clôturer le ticket (utilisée par client et admin)
+window.fermerTicket = async (ticketId, role) => {
+    if(!confirm("Es-tu sûr de vouloir clôturer ce ticket ?")) return;
+    
+    await db.collection('support').doc(ticketId).update({
+        statut: 'Clôturé',
+        dateMAJ: Date.now()
+    });
+    
+    afficherNotification("Ticket clôturé !");
+    
+    if (role === 'client') {
+        ouvrirConversation(ticketId); // Recharge pour masquer la zone de texte
+    } else {
+        chargerAdminSupport(); // Rafraîchit la vue admin
+    }
 }
 
 
@@ -312,13 +350,17 @@ window.repondreAuTicket = async () => {
 window.chargerAdminCommandes = async () => {
     const div = document.getElementById('admin-content');
     div.innerHTML = '<p class="empty-state">Chargement de toutes les commandes...</p>';
-    const snap = await db.collection('commandes').get();
+    const snap = await db.collection('commandes').orderBy('date', 'desc').get();
     let html = '';
     snap.forEach(doc => {
         const c = doc.data();
+        const date = c.date ? c.date.toDate().toLocaleDateString('fr-FR') : 'Date inconnue';
         html += `<div class="saved-item" style="flex-direction: column; align-items: flex-start; border-color: #555;">
-            <strong>Client: ${c.email}</strong>
-            <span style="color: #ccc; font-size: 0.8rem;">${c.total} € | Statut: ${c.statut}</span>
+            <div style="width:100%; display:flex; justify-content:space-between; margin-bottom:5px;">
+                <strong>${c.email}</strong>
+                <span style="color:#4CAF50;">${c.statut}</span>
+            </div>
+            <span style="color: #ccc; font-size: 0.8rem;">${c.total} € | Le ${date}</span>
         </div>`;
     });
     div.innerHTML = html || '<p class="empty-state">Aucune commande.</p>';
@@ -327,7 +369,7 @@ window.chargerAdminCommandes = async () => {
 window.chargerAdminRetours = async () => {
     const div = document.getElementById('admin-content');
     div.innerHTML = '<p class="empty-state">Chargement des retours...</p>';
-    const snap = await db.collection('retours').get();
+    const snap = await db.collection('retours').orderBy('date', 'desc').get();
     let html = '';
     snap.forEach(doc => {
         const r = doc.data();
@@ -346,20 +388,31 @@ window.chargerAdminSupport = async () => {
     let html = '';
     snap.forEach(doc => {
         const t = doc.data();
+        let color = t.statut === 'Répondu' ? '#4CAF50' : (t.statut === 'Clôturé' ? '#f44336' : '#FF9800');
+        
+        let actionsHtml = '';
+        if (t.statut !== 'Clôturé') {
+            actionsHtml = `
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <input type="text" id="reply-admin-${doc.id}" placeholder="Répondre au client..." style="flex: 1; padding: 8px; background: #000; color: #fff; border: 1px solid #444; border-radius: 4px;">
+                <button class="btn-style" onclick="envoyerReponseAdmin('${doc.id}')" style="font-size: 0.8rem; padding: 8px 15px;">RÉPONDRE</button>
+                <button class="btn-style" onclick="fermerTicket('${doc.id}', 'admin')" style="background: #f44336; color: #fff; font-size: 0.8rem; padding: 8px 15px; border:none;">🔒 CLÔTURER</button>
+            </div>`;
+        } else {
+            actionsHtml = `<div style="color: #f44336; font-size: 0.8rem; margin-top: 10px; font-weight: bold; text-align: center;">🔒 TICKET CLÔTURÉ</div>`;
+        }
+
         html += `
         <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #555;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                 <strong>De: ${t.email}</strong>
-                <span style="color: ${t.statut==='En attente'?'#FF9800':'#4CAF50'};">${t.statut}</span>
+                <span style="color: ${color};">${t.statut}</span>
             </div>
             <p style="font-size: 0.9rem; margin-bottom: 10px;">Sujet: ${t.sujet}</p>
-            <div style="background: #000; padding: 10px; border-radius: 5px; max-height: 150px; overflow-y: auto; margin-bottom: 10px; font-size: 0.8rem; color: #ccc;">
+            <div style="background: #000; padding: 10px; border-radius: 5px; max-height: 150px; overflow-y: auto; font-size: 0.8rem; color: #ccc;">
                 ${t.messages.map(m => `<b>${m.sender==='FUTURE'?'FUTURE':'Client'}</b>: ${m.text}`).join('<br><br>')}
             </div>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="reply-admin-${doc.id}" placeholder="Répondre au client..." style="flex: 1; padding: 8px; background: #000; color: #fff; border: 1px solid #444; border-radius: 4px;">
-                <button class="btn-style" onclick="envoyerReponseAdmin('${doc.id}')" style="font-size: 0.8rem; padding: 8px 15px;">RÉPONDRE</button>
-            </div>
+            ${actionsHtml}
         </div>`;
     });
     div.innerHTML = html || '<p class="empty-state">Aucun message client.</p>';
@@ -376,7 +429,7 @@ window.envoyerReponseAdmin = async (ticketId) => {
     });
     
     afficherNotification("Réponse envoyée au client !");
-    chargerAdminSupport(); // Rafraîchit la liste
+    chargerAdminSupport(); 
 }
 
 
