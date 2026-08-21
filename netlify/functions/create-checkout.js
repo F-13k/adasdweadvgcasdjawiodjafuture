@@ -1,46 +1,45 @@
-// On importe l'outil Stripe (Netlify va le télécharger tout seul grâce au package.json)
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 exports.handler = async (event) => {
-    // On vérifie que c'est bien une requête POST (une demande d'achat)
     if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Méthode non autorisée' };
+        return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
     try {
-        // On récupère le contenu du panier que notre site a envoyé
-        const { panier } = JSON.parse(event.body);
+        // On récupère le panier ET la remise envoyés par le site web
+        const { panier, remise } = JSON.parse(event.body);
 
-        // On transforme le panier de notre site en format compréhensible pour Stripe
+        // Si y'a un code promo de 20%, le multiplicateur sera 0.80. Sinon c'est 1.
+        const multiplicateurRemise = remise ? (1 - (remise / 100)) : 1;
+
         const lineItems = panier.map(article => ({
             price_data: {
                 currency: 'eur',
                 product_data: {
-                    name: article.nom,
+                    // On affiche le Nom ET la Taille sur Stripe !
+                    name: `${article.nom} (Taille: ${article.taille})`,
                 },
-                unit_amount: Math.round(article.prix * 100), // Stripe compte en centimes (35€ = 3500)
+                // On applique la remise sur le prix de l'article avant de l'envoyer à Stripe
+                unit_amount: Math.round((article.prix * multiplicateurRemise) * 100),
             },
-            quantity: 1, // On simplifie pour l'instant : 1 quantité par article ajouté
+            quantity: article.quantite,
         }));
 
-        // On crée la fameuse session de paiement sécurisée
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: lineItems,
             mode: 'payment',
-            // Les pages de redirection après paiement
-            success_url: 'https://boutiquefuture.netlify.app/', // Redirige vers l'accueil après succès pour l'instant
-            cancel_url: 'https://boutiquefuture.netlify.app/', // Redirige vers l'accueil si annulation
+            success_url: 'https://boutiquefuture.netlify.app/',
+            cancel_url: 'https://boutiquefuture.netlify.app/',
         });
 
-        // On renvoie l'URL de la page de paiement sécurisée Stripe à notre site
         return {
             statusCode: 200,
             body: JSON.stringify({ url: session.url }),
         };
 
     } catch (error) {
-        console.error("Erreur Stripe:", error);
+        console.error("Stripe error:", error);
         return {
             statusCode: 500,
             body: JSON.stringify({ error: error.message }),
