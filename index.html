@@ -26,11 +26,14 @@
         .collection { padding: 100px 50px; text-align: center; }
         .collection h2 { font-size: 3rem; margin-bottom: 60px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; }
-        .card { background: #141414; padding: 20px; border-radius: 15px; text-align: left; transition: 0.3s; }
+        
+        .card { background: #141414; padding: 20px; border-radius: 15px; text-align: left; transition: 0.3s; position: relative; }
         .card img { width: 100%; height: 350px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; }
         .btn-buy { background: transparent; border: 1px solid #555; color: #fff; width: 100%; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.3s; font-family: 'Roboto', sans-serif; }
-        .btn-buy:hover { background: #fff; color: #000; }
+        .btn-buy:hover:not(:disabled) { background: #fff; color: #000; }
+        .btn-buy:disabled { cursor: not-allowed; opacity: 0.5; }
         .select-taille { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #444; border-radius: 5px; margin-bottom: 15px; font-family: 'Roboto'; cursor: pointer; }
+        .stock-badge { color: #f44336; font-weight: bold; margin-bottom: 10px; display: none; text-align: center; font-size: 0.9rem; }
 
         #cart-sidebar { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: #111; z-index: 2000; padding: 30px; transition: 0.4s; border-left: 1px solid #333; overflow-y: auto; }
         #cart-sidebar.active { right: 0; }
@@ -52,13 +55,12 @@
         .empty-state { color: #888; font-style: italic; margin-bottom: 15px; font-size: 0.9rem; }
         .saved-item { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
 
-        /* === ADAPTATION POUR TÉLÉPHONE (RESPONSIVE) === */
         @media (max-width: 768px) {
             header { padding: 15px; flex-direction: column; gap: 15px; }
             nav ul { justify-content: center; gap: 15px; flex-wrap: wrap; }
             .hero h1 { font-size: 3.5rem; }
             .hero p { font-size: 1.2rem; padding: 0 20px; }
-            .collection { padding: 120px 20px 50px 20px; } /* Marge en haut pour le header plus grand */
+            .collection { padding: 120px 20px 50px 20px; }
             #cart-sidebar { width: 100%; right: -100%; border-left: none; }
             #auth-sidebar { width: 100%; left: -100%; border-right: none; }
         }
@@ -85,35 +87,40 @@
     <section id="collection" class="collection">
         <h2>Drop 01</h2>
         <div class="grid">
-            <div class="card">
+            <!-- CARTE 1 : T-SHIRT -->
+            <div class="card" id="card-tshirt">
                 <img src="product_tshirt.jpg" alt="T-Shirt">
+                <div class="stock-badge" id="badge-tshirt">RUPTURE DE STOCK</div>
                 <h3>T-Shirt "The Beginning"</h3>
                 <p style="margin-bottom: 10px;">35,00 €</p>
-                <!-- CHOIX DES TAILLES -->
                 <select id="taille-tshirt" class="select-taille">
                     <option value="S">Taille S</option><option value="M">Taille M</option><option value="L">Taille L</option><option value="XL">Taille XL</option>
                 </select>
-                <button class="btn-buy" onclick="ajouterAuPanier('T-Shirt The Beginning', 35, document.getElementById('taille-tshirt').value)">AJOUTER AU PANIER</button>
+                <button class="btn-buy" id="btn-tshirt" onclick="ajouterAuPanier('T-Shirt The Beginning', 35, document.getElementById('taille-tshirt').value)">AJOUTER AU PANIER</button>
             </div>
             
-            <div class="card">
+            <!-- CARTE 2 : VESTE -->
+            <div class="card" id="card-veste">
                 <img src="product_jacket.jpg" alt="Veste">
+                <div class="stock-badge" id="badge-veste">RUPTURE DE STOCK</div>
                 <h3>Track Jacket</h3>
                 <p style="margin-bottom: 10px;">75,00 €</p>
                 <select id="taille-veste" class="select-taille">
                     <option value="S">Taille S</option><option value="M">Taille M</option><option value="L">Taille L</option><option value="XL">Taille XL</option>
                 </select>
-                <button class="btn-buy" onclick="ajouterAuPanier('Track Jacket', 75, document.getElementById('taille-veste').value)">AJOUTER AU PANIER</button>
+                <button class="btn-buy" id="btn-veste" onclick="ajouterAuPanier('Track Jacket', 75, document.getElementById('taille-veste').value)">AJOUTER AU PANIER</button>
             </div>
             
-            <div class="card">
+            <!-- CARTE 3 : DOUDOUNE -->
+            <div class="card" id="card-puffer">
                 <img src="product_puffer.jpg" alt="Doudoune">
+                <div class="stock-badge" id="badge-puffer">RUPTURE DE STOCK</div>
                 <h3>Doudoune Glossy</h3>
                 <p style="margin-bottom: 10px;">120,00 €</p>
                 <select id="taille-doudoune" class="select-taille">
                     <option value="S">Taille S</option><option value="M">Taille M</option><option value="L">Taille L</option><option value="XL">Taille XL</option>
                 </select>
-                <button class="btn-buy" onclick="ajouterAuPanier('Doudoune Glossy', 120, document.getElementById('taille-doudoune').value)">AJOUTER AU PANIER</button>
+                <button class="btn-buy" id="btn-puffer" onclick="ajouterAuPanier('Doudoune Glossy', 120, document.getElementById('taille-doudoune').value)">AJOUTER AU PANIER</button>
             </div>
         </div>
     </section>
@@ -122,10 +129,8 @@
     <div id="cart-sidebar">
         <div class="close-cart" id="close-cart-btn">✖</div>
         <h2 class="montserrat" style="margin-bottom: 20px;">Ton Panier</h2>
-        
         <div id="cart-items"><p style="color: #aaa;">Ton panier est vide.</p></div>
         
-        <!-- SECTION CODE PROMO -->
         <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
             <p style="font-size: 0.9rem; margin-bottom: 5px;">Code Promo :</p>
             <div style="display: flex; gap: 10px;">
@@ -174,15 +179,18 @@
                     <h3 class="montserrat" style="margin-bottom:15px; color: #fff;">ESPACE PATRON</h3>
                     
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px;">
-                        <button class="btn-style" onclick="chargerAdminCommandes()" style="background: #333; color: #fff; border: 1px solid #555;">Commandes</button>
-                        <button class="btn-style" onclick="chargerAdminRetours()" style="background: #333; color: #fff; border: 1px solid #555;">Retours</button>
-                        <button class="btn-style" onclick="chargerAdminSupport()" style="background: #333; color: #fff; border: 1px solid #555;">Support</button>
-                        <button class="btn-style" onclick="chargerAdminPromos()" style="background: #333; color: #fff; border: 1px solid #555;">Promos</button>
+                        <button class="btn-style" onclick="chargerAdminCommandes()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Commandes</button>
+                        <button class="btn-style" onclick="chargerAdminRetours()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Retours</button>
+                        <button class="btn-style" onclick="chargerAdminSupport()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Support</button>
+                        <button class="btn-style" onclick="chargerAdminPromos()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Promos</button>
+                        <button class="btn-style" onclick="chargerAdminStocks()" style="background: #333; color: #fff; border: 1px solid #555; white-space: nowrap;">Stocks</button>
                     </div>
                     <div id="admin-content"><p class="empty-state">Sélectionne une catégorie ci-dessus.</p></div>
                 </div>
 
+                <!-- VUES CLIENTS -->
                 <div id="view-commandes" class="dashboard-view"></div>
+                <div id="view-retours" class="dashboard-view"></div>
                 
                 <div id="view-adresses" class="dashboard-view">
                     <button class="btn-back" onclick="closeView()">⬅ Retour</button>
@@ -208,9 +216,6 @@
                     </form>
                 </div>
 
-                <div id="view-retours" class="dashboard-view"></div>
-
-                <!-- SUPPORT -->
                 <div id="view-support" class="dashboard-view">
                     <button class="btn-back" onclick="closeView()">⬅ Retour</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Support Client</h3>
