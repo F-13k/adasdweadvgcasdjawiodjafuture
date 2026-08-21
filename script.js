@@ -1,4 +1,13 @@
-// --- CONFIGURATION FIREBASE ---
+// ==========================================
+// 0. INITIALISATION DE STRIPE
+// ==========================================
+// ⚠️ ATTENTION : REMPLACE LA LIGNE CI-DESSOUS PAR TA VRAIE CLÉ PUBLIQUE STRIPE
+const stripe = Stripe('pk_test_51U6ggQH9XGzkkTIl6TOpdSkL2rzAZuhYQ6Vl48UyBrGciyVmL9j7n4QltBisAQCtbRD46FgRomg5HuFvtvR3oimy00YYh2n3h4');
+
+
+// ==========================================
+// 1. CONFIGURATION FIREBASE
+// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyCRiUSyocGDUNaGN7cAgbVJAXGDBFt0v5c",
   authDomain: "future-be1d6.firebaseapp.com",
@@ -13,7 +22,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
 // ==========================================
-// 1. GESTION DE L'AUTHENTIFICATION (COMPTES)
+// 2. GESTION DE L'AUTHENTIFICATION (COMPTES)
 // ==========================================
 let isLoginMode = true;
 
@@ -81,9 +90,8 @@ auth.onAuthStateChanged((user) => {
     }
 });
 
-
 // ==========================================
-// 2. NAVIGATION DANS LE PANNEAU CLIENT
+// 3. NAVIGATION DANS LE PANNEAU CLIENT
 // ==========================================
 function openView(viewId) {
     sectionDashboard.style.display = "none";
@@ -101,12 +109,11 @@ function closeView() {
 }
 
 // ==========================================
-// 3. GESTION DES ADRESSES ET CARTES
+// 4. GESTION DES ADRESSES ET CARTES
 // ==========================================
 let mesAdresses = [];
 let mesCartes = [];
 
-// Afficher les formulaires quand on clique sur le bouton "+"
 document.getElementById('btn-show-address').addEventListener('click', () => {
     document.getElementById('form-address').style.display = 'block';
     document.getElementById('btn-show-address').style.display = 'none';
@@ -117,22 +124,16 @@ document.getElementById('btn-show-card').addEventListener('click', () => {
     document.getElementById('btn-show-card').style.display = 'none';
 });
 
-// Enregistrer une adresse
 window.sauvegarderAdresse = function(event) {
-    event.preventDefault(); // Empêche la page de sauter
+    event.preventDefault();
     const rue = document.getElementById('addr-rue').value;
     const cp = document.getElementById('addr-cp').value;
     const ville = document.getElementById('addr-ville').value;
     
-    // On ajoute l'adresse à la liste
     mesAdresses.push(`${rue}, ${cp} ${ville}`);
-    
-    // On nettoie et cache le formulaire
     document.getElementById('form-address').reset();
     document.getElementById('form-address').style.display = 'none';
     document.getElementById('btn-show-address').style.display = 'block';
-    
-    // On met à jour l'affichage
     afficherAdresses();
 }
 
@@ -148,19 +149,15 @@ function afficherAdresses() {
     }
 }
 
-// Enregistrer une carte
 window.sauvegarderCarte = function(event) {
     event.preventDefault();
     const numero = document.getElementById('card-numero').value;
-    
-    // Pour la sécurité, on ne garde que les 4 derniers chiffres
     const derniersChiffres = numero.slice(-4);
     mesCartes.push(`**** **** **** ${derniersChiffres}`);
     
     document.getElementById('form-card').reset();
     document.getElementById('form-card').style.display = 'none';
     document.getElementById('btn-show-card').style.display = 'block';
-    
     afficherCartes();
 }
 
@@ -176,9 +173,8 @@ function afficherCartes() {
     }
 }
 
-
 // ==========================================
-// 4. FORMULAIRE DE SUPPORT
+// 5. FORMULAIRE DE SUPPORT
 // ==========================================
 window.envoyerMessage = function(event) {
     event.preventDefault();
@@ -188,9 +184,8 @@ window.envoyerMessage = function(event) {
     closeView();
 }
 
-
 // ==========================================
-// 5. GESTION DU PANIER
+// 6. GESTION DU PANIER
 // ==========================================
 let panier = [];
 const cartSidebar = document.getElementById('cart-sidebar');
@@ -229,3 +224,44 @@ function mettreAJourPanier() {
     }
     affichageTotal.innerText = total;
 }
+
+// ==========================================
+// 7. PAIEMENT AVEC STRIPE
+// ==========================================
+const btnCheckout = document.getElementById('btn-checkout');
+
+btnCheckout.addEventListener('click', async () => {
+    if (panier.length === 0) {
+        alert("Ton panier est vide !");
+        return;
+    }
+
+    // Fait patienter l'utilisateur pendant que le serveur travaille
+    btnCheckout.innerText = "CHARGEMENT...";
+    btnCheckout.disabled = true;
+
+    try {
+        // Appelle notre fichier backend Netlify (celui dans le dossier /netlify/functions)
+        const response = await fetch('/.netlify/functions/create-checkout', {
+            method: 'POST',
+            body: JSON.stringify({ panier: panier }),
+        });
+
+        const data = await response.json();
+
+        // Redirection vers la page de paiement Stripe
+        if (data.url) {
+            window.location.href = data.url;
+        } else {
+            alert("Erreur lors de la création du paiement.");
+            console.error(data);
+            btnCheckout.innerText = "VALIDER LA COMMANDE";
+            btnCheckout.disabled = false;
+        }
+    } catch (error) {
+        console.error("Erreur de connexion au serveur:", error);
+        alert("Impossible de contacter le serveur de paiement.");
+        btnCheckout.innerText = "VALIDER LA COMMANDE";
+        btnCheckout.disabled = false;
+    }
+});
