@@ -50,21 +50,28 @@
         .insta-link { display: inline-block; margin: 20px 0; font-size: 1.2rem; font-weight: bold; color: #fff; }
         .insta-link:hover { color: #888; }
 
-        /* === PANIER LATÉRAL === */
+        /* === PANIER LATÉRAL (À DROITE) === */
         #cart-sidebar { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: #111; z-index: 2000; padding: 30px; transition: 0.4s; border-left: 1px solid #333; overflow-y: auto; }
         #cart-sidebar.active { right: 0; }
         .close-cart { cursor: pointer; font-size: 1.5rem; text-align: right; margin-bottom: 20px; }
         .cart-item { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .cart-total { font-size: 1.5rem; font-weight: bold; margin-top: 30px; text-align: right; }
 
-        /* === FENÊTRE AUTHENTIFICATION === */
-        #auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; }
-        .auth-box { background: #111; padding: 40px; border-radius: 10px; width: 400px; text-align: center; border: 1px solid #333; position: relative; }
-        .close-auth { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.5rem; }
-        .auth-box input { width: 100%; padding: 15px; margin-bottom: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; }
-        .auth-box button { width: 100%; padding: 15px; margin-bottom: 15px; font-size: 1rem; cursor: pointer;}
-        .auth-switch { color: #888; cursor: pointer; font-size: 0.9rem; text-decoration: underline; }
+        /* === PANNEAU LATÉRAL : COMPTE (À GAUCHE) === */
+        #auth-sidebar { position: fixed; top: 0; left: -400px; width: 400px; height: 100vh; background: #111; z-index: 2000; padding: 30px; transition: 0.4s; border-right: 1px solid #333; overflow-y: auto; }
+        #auth-sidebar.active { left: 0; }
+        .close-auth { cursor: pointer; font-size: 1.5rem; text-align: left; margin-bottom: 20px; display: block; }
+        .auth-content { margin-top: 20px; }
+        .auth-content input { width: 100%; padding: 15px; margin-bottom: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; }
+        .auth-switch { color: #888; cursor: pointer; font-size: 0.9rem; text-decoration: underline; margin-top: 15px; display: inline-block;}
         .auth-switch:hover { color: #fff; }
+        
+        /* Menu Espace Client */
+        .dashboard-menu { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
+        .dashboard-menu button { display: block; width: 100%; text-align: left; background: transparent; border: none; color: #aaa; padding: 12px 0; font-size: 1rem; cursor: pointer; transition: 0.3s; font-family: 'Roboto', sans-serif;}
+        .dashboard-menu button:hover { color: #fff; padding-left: 10px; }
+        .dashboard-menu a { display: block; width: 100%; text-align: left; background: transparent; border: none; color: #aaa; padding: 12px 0; font-size: 1rem; cursor: pointer; transition: 0.3s; font-family: 'Roboto', sans-serif;}
+        .dashboard-menu a:hover { color: #fff; padding-left: 10px; }
     </style>
 </head>
 <body>
@@ -131,7 +138,7 @@
         <p>© 2026 FUTURE. Tous droits réservés.</p>
     </footer>
 
-    <!-- PANIER LATÉRAL -->
+    <!-- PANIER LATÉRAL (DROITE) -->
     <div id="cart-sidebar">
         <div class="close-cart" id="close-cart-btn">✖</div>
         <h2 class="montserrat" style="margin-bottom: 20px;">Ton Panier</h2>
@@ -142,11 +149,11 @@
         <button class="btn-buy" style="margin-top: 20px; background: #fff; color: #000;">VALIDER LA COMMANDE</button>
     </div>
 
-    <!-- FENÊTRE D'AUTHENTIFICATION -->
-    <div id="auth-modal">
-        <div class="auth-box">
-            <span class="close-auth" id="close-auth">✖</span>
-            
+    <!-- PANNEAU LATÉRAL : COMPTE (GAUCHE) -->
+    <div id="auth-sidebar">
+        <div class="close-auth" id="close-auth">✖</div>
+        
+        <div class="auth-content">
             <!-- Section Login / Register -->
             <div id="section-login">
                 <h2 class="montserrat" id="auth-title" style="margin-bottom: 20px;">CONNEXION</h2>
@@ -156,17 +163,32 @@
                 <p class="auth-switch" id="toggle-auth-mode">Pas de compte ? Créer un compte</p>
             </div>
 
-            <!-- Section Espace Client -->
+            <!-- Section Espace Client Complet -->
             <div id="section-dashboard" style="display: none;">
                 <h2 class="montserrat" style="margin-bottom: 20px;">MON ESPACE</h2>
-                <p style="margin-bottom: 20px; color: #aaa;">Connecté en tant que : <br><strong id="user-email" style="color: #fff;"></strong></p>
-                <button class="btn-buy" id="btn-logout" style="background: transparent; border: 1px solid #fff; color: #fff;">SE DÉCONNECTER</button>
+                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">Connecté : <br><strong id="user-email" style="color: #fff;"></strong></p>
+                
+                <div class="dashboard-menu">
+                    <button>📦 Mes Commandes</button>
+                    <button>📍 Mes Adresses</button>
+                    <button>💳 Moyens de paiement</button>
+                    <button>🔄 Demander un retour</button>
+                    <button>⚙️ Paramètres du compte</button>
+                    <!-- Lien direct pour envoyer un mail -->
+                    <a href="mailto:fefesimcer@gmail.com?subject=Demande%20de%20support%20-%20FUTURE">✉️ Contacter le support</a>
+                </div>
+
+                <button class="btn-buy" id="btn-logout" style="background: transparent; border: 1px solid #fff; color: #fff; margin-top: 30px;">SE DÉCONNECTER</button>
             </div>
         </div>
     </div>
 
-    <!-- type="module" est crucial pour faire fonctionner Firebase -->
-    <script type="module" src="script.js"></script>
+    <!-- Firebase Classique -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    
+    <!-- Notre code -->
+    <script src="script.js"></script>
 
 </body>
 </html>
