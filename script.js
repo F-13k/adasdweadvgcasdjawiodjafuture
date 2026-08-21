@@ -91,12 +91,17 @@ auth.onAuthStateChanged((user) => {
 });
 
 // ==========================================
-// 3. NAVIGATION DANS LE PANNEAU CLIENT
+// 3. NAVIGATION ET CHARGEMENT DES COMMANDES
 // ==========================================
 function openView(viewId) {
     sectionDashboard.style.display = "none";
     document.querySelectorAll('.dashboard-view').forEach(view => view.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
+    
+    // Si on ouvre l'onglet commandes, on va chercher les infos dans Firebase
+    if (viewId === 'view-commandes') {
+        chargerCommandes();
+    }
 }
 
 function closeView() {
@@ -106,6 +111,60 @@ function closeView() {
     } else {
         sectionLogin.style.display = "block";
     }
+}
+
+function chargerCommandes() {
+    const vueCommandes = document.getElementById('view-commandes');
+    
+    // On met un texte de chargement
+    vueCommandes.innerHTML = `
+        <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
+        <h3 class="montserrat" style="margin-bottom:15px;">Mes Commandes</h3>
+        <p class="empty-state" id="loading-txt">Chargement de tes commandes...</p>
+        <div id="liste-commandes"></div>
+    `;
+
+    if (!auth.currentUser) return;
+
+    // On interroge la base de données Firebase
+    db.collection('commandes')
+      .where('email', '==', auth.currentUser.email)
+      .get()
+      .then((querySnapshot) => {
+          document.getElementById('loading-txt').style.display = 'none';
+          const liste = document.getElementById('liste-commandes');
+
+          if (querySnapshot.empty) {
+              liste.innerHTML = '<p class="empty-state">Tu n\'as aucune commande pour le moment.</p>';
+              return;
+          }
+
+          let html = '';
+          // On liste chaque commande trouvée
+          querySnapshot.forEach((doc) => {
+              const cmd = doc.data();
+              const date = cmd.date ? cmd.date.toDate().toLocaleDateString('fr-FR') : 'Récente';
+              
+              // Design d'une commande
+              html += `
+                <div class="saved-item" style="flex-direction: column; align-items: flex-start;">
+                    <div style="width: 100%; display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px;">
+                        <strong>Commande du ${date}</strong>
+                        <span style="color: #4CAF50;">${cmd.statut}</span>
+                    </div>
+                    <ul style="color: #ccc; font-size: 0.85rem; margin-bottom: 10px; width: 100%;">
+                        ${cmd.articles.map(art => `<li>• 1x ${art.nom} - ${art.prix} €</li>`).join('')}
+                    </ul>
+                    <strong>Total : ${cmd.total} €</strong>
+                </div>
+              `;
+          });
+          liste.innerHTML = html;
+      })
+      .catch((erreur) => {
+          console.error("Erreur Firebase:", erreur);
+          document.getElementById('loading-txt').innerText = "Erreur de chargement.";
+      });
 }
 
 // ==========================================
