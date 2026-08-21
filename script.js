@@ -3,7 +3,7 @@
 // ==========================================
 // ⚠️ ATTENTION : REMPLACE LA LIGNE CI-DESSOUS PAR TA VRAIE CLÉ PUBLIQUE STRIPE
 const stripe = Stripe('pk_test_51U6ggQH9XGzkkTIl6TOpdSkL2rzAZuhYQ6Vl48UyBrGciyVmL9j7n4QltBisAQCtbRD46FgRomg5HuFvtvR3oimy00YYh2n3h4');
-
+const db = firebase.firestore();
 
 // ==========================================
 // 1. CONFIGURATION FIREBASE
