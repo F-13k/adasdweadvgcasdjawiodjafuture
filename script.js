@@ -9,7 +9,6 @@ const firebaseConfig = {
   measurementId: "G-R03K1D0KYC"
 };
 
-// Initialisation
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
@@ -32,15 +31,11 @@ const sectionDashboard = document.getElementById('section-dashboard');
 const userEmailDisplay = document.getElementById('user-email');
 const btnLogout = document.getElementById('btn-logout');
 
-// Ouvrir / Fermer le panneau compte (Gauche)
-btnCompte.addEventListener('click', () => {
-    authSidebar.classList.add('active');
-});
-closeAuth.addEventListener('click', () => {
-    authSidebar.classList.remove('active');
-});
+// Ouvrir / Fermer
+btnCompte.addEventListener('click', () => { authSidebar.classList.add('active'); });
+closeAuth.addEventListener('click', () => { authSidebar.classList.remove('active'); });
 
-// Basculer entre Connexion et Inscription
+// Basculer Connexion/Inscription
 toggleAuthMode.addEventListener('click', () => {
     isLoginMode = !isLoginMode;
     if(isLoginMode) {
@@ -54,51 +49,25 @@ toggleAuthMode.addEventListener('click', () => {
     }
 });
 
-// Bouton Valider
+// Valider Auth
 btnSubmitAuth.addEventListener('click', () => {
     const email = emailInput.value;
     const password = passwordInput.value;
-
-    if (!email || !password) {
-        alert("Veuillez remplir tous les champs.");
-        return;
-    }
+    if (!email || !password) return alert("Veuillez remplir tous les champs.");
 
     if(isLoginMode) {
-        // Connexion
         auth.signInWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                alert("Connexion réussie ! Bienvenue sur Future.");
-                emailInput.value = "";
-                passwordInput.value = "";
-            })
-            .catch((error) => {
-                alert("Erreur de connexion. Vérifiez votre e-mail et mot de passe.");
-                console.error(error);
-            });
+            .then(() => { emailInput.value = ""; passwordInput.value = ""; closeView(); })
+            .catch(err => alert("Erreur de connexion. Vérifiez vos identifiants."));
     } else {
-        // Inscription
         auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                alert("Compte créé avec succès ! Bienvenue dans la famille Future.");
-                emailInput.value = "";
-                passwordInput.value = "";
-            })
-            .catch((error) => {
-                alert("Erreur : Le mot de passe doit faire au moins 6 caractères ou l'e-mail est déjà utilisé.");
-                console.error(error);
-            });
+            .then(() => { alert("Compte créé !"); emailInput.value = ""; passwordInput.value = ""; })
+            .catch(err => alert("Erreur : Mot de passe trop court ou e-mail utilisé."));
     }
 });
 
-// Déconnexion
-btnLogout.addEventListener('click', () => {
-    auth.signOut().then(() => {
-        alert("Vous êtes déconnecté.");
-    });
-});
+btnLogout.addEventListener('click', () => { auth.signOut(); closeView(); });
 
-// Observer l'état
 auth.onAuthStateChanged((user) => {
     if (user) {
         btnCompte.innerText = "MON ESPACE";
@@ -114,21 +83,62 @@ auth.onAuthStateChanged((user) => {
 
 
 // ==========================================
-// 2. GESTION DU PANIER
+// 2. NAVIGATION DANS LE PANNEAU CLIENT
+// ==========================================
+
+// Fonction pour ouvrir une sous-page
+function openView(viewId) {
+    // 1. Cacher le menu principal
+    sectionDashboard.style.display = "none";
+    // 2. Cacher toutes les autres vues au cas où
+    document.querySelectorAll('.dashboard-view').forEach(view => {
+        view.classList.remove('active');
+    });
+    // 3. Afficher la vue demandée
+    document.getElementById(viewId).classList.add('active');
+}
+
+// Fonction pour faire "Retour" et revoir le menu principal
+function closeView() {
+    // Cacher toutes les vues
+    document.querySelectorAll('.dashboard-view').forEach(view => {
+        view.classList.remove('active');
+    });
+    // Réafficher le menu si on est connecté, sinon la page login
+    if (auth.currentUser) {
+        sectionDashboard.style.display = "block";
+    } else {
+        sectionLogin.style.display = "block";
+    }
+}
+
+// ==========================================
+// 3. FORMULAIRE DE SUPPORT
+// ==========================================
+function envoyerMessage(event) {
+    event.preventDefault(); // Empêche la page de se recharger
+    
+    // Le code ci-dessous simule l'envoi. 
+    // Plus tard, on connectera ça à un service d'envoi d'emails pro (ex: Formspree)
+    alert("Ton message a bien été envoyé au support (fefesimcer@gmail.com) ! Nous te répondrons sous 24h.");
+    
+    // On vide les champs après envoi
+    document.getElementById('sujet-support').value = "";
+    document.getElementById('message-support').value = "";
+    closeView(); // Retour au menu
+}
+
+
+// ==========================================
+// 4. GESTION DU PANIER
 // ==========================================
 let panier = [];
-
 const cartSidebar = document.getElementById('cart-sidebar');
 const btnPanier = document.getElementById('btn-panier');
 const closeCartBtn = document.getElementById('close-cart-btn');
 
-// Ouvrir / Fermer le panier (Droite)
-btnPanier.addEventListener('click', () => {
-    cartSidebar.classList.add('active');
-});
-closeCartBtn.addEventListener('click', () => {
-    cartSidebar.classList.remove('active');
-});
+btnPanier.addEventListener('click', () => { cartSidebar.classList.add('active'); });
+closeCartBtn.addEventListener('click', () => { cartSidebar.classList.remove('active'); });
 
 function ajouterAuPanier(nom, prix) {
     panier.push({ nom: nom, prix: prix });
@@ -137,21 +147,19 @@ function ajouterAuPanier(nom, prix) {
 }
 
 function mettreAJourPanier() {
-    const conteneurArticles = document.getElementById('cart-items');
-    const compteur = document.getElementById('cart-count');
+    const conteneur = document.getElementById('cart-items');
     const affichageTotal = document.getElementById('total-price');
+    document.getElementById('cart-count').innerText = panier.length;
     
-    compteur.innerText = panier.length;
-    conteneurArticles.innerHTML = '';
-    
+    conteneur.innerHTML = '';
     let total = 0;
     
     if (panier.length === 0) {
-        conteneurArticles.innerHTML = '<p style="color: #aaa;">Ton panier est vide.</p>';
+        conteneur.innerHTML = '<p style="color: #aaa;">Ton panier est vide.</p>';
     } else {
         panier.forEach(article => {
             total += article.prix;
-            conteneurArticles.innerHTML += `
+            conteneur.innerHTML += `
                 <div class="cart-item">
                     <span>${article.nom}</span>
                     <span>${article.prix} €</span>
@@ -159,6 +167,5 @@ function mettreAJourPanier() {
             `;
         });
     }
-    
     affichageTotal.innerText = total;
 }
