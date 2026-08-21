@@ -32,7 +32,7 @@
         .card { background: #141414; padding: 20px; border-radius: 15px; text-align: left; transition: 0.3s; }
         .card:hover { transform: translateY(-5px); }
         .card img { width: 100%; height: 350px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; }
-        .btn-buy { background: transparent; border: 1px solid #555; color: #fff; width: 100%; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.3s; }
+        .btn-buy { background: transparent; border: 1px solid #555; color: #fff; width: 100%; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.3s; font-family: 'Roboto', sans-serif; }
         .btn-buy:hover { background: #fff; color: #000; }
 
         /* === FAQ & FOOTER === */
@@ -56,11 +56,11 @@
         #auth-sidebar.active { left: 0; }
         .close-auth { cursor: pointer; font-size: 1.5rem; text-align: left; margin-bottom: 20px; display: block; }
         
-        .auth-content input, .auth-content textarea { width: 100%; padding: 15px; margin-bottom: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; font-family: 'Roboto'; }
+        .auth-content input, .auth-content textarea, .dashboard-view input { width: 100%; padding: 12px; margin-bottom: 10px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; font-family: 'Roboto', sans-serif; }
         .auth-switch { color: #888; cursor: pointer; font-size: 0.9rem; text-decoration: underline; margin-top: 15px; display: inline-block;}
         .auth-switch:hover { color: #fff; }
         
-        /* Navigation dans l'espace client */
+        /* Menu Espace Client */
         .dashboard-menu { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
         .dashboard-menu button { display: block; width: 100%; text-align: left; background: transparent; border: none; color: #aaa; padding: 15px 0; font-size: 1rem; cursor: pointer; transition: 0.3s; font-family: 'Roboto', sans-serif; border-bottom: 1px solid #222;}
         .dashboard-menu button:hover { color: #fff; padding-left: 10px; }
@@ -70,7 +70,10 @@
         .dashboard-view.active { display: block; }
         .btn-back { background: transparent; border: none; color: #888; cursor: pointer; font-size: 0.9rem; margin-bottom: 20px; }
         .btn-back:hover { color: #fff; }
-        .empty-state { color: #888; font-style: italic; margin-bottom: 20px; font-size: 0.9rem; }
+        .empty-state { color: #888; font-style: italic; margin-bottom: 15px; font-size: 0.9rem; }
+        
+        /* Design des éléments sauvegardés (adresse, carte) */
+        .saved-item { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
     </style>
 </head>
 <body>
@@ -92,7 +95,6 @@
     </section>
 
     <section id="collection" class="collection">
-        <!-- Produits (J'ai raccourci ici visuellement pour le message, mais le code HTML est complet) -->
         <h2>Drop 01</h2>
         <div class="grid">
             <div class="card">
@@ -115,10 +117,6 @@
             </div>
         </div>
     </section>
-
-    <footer>
-        <a href="https://instagram.com/ourfuture.off" target="_blank" class="insta-link">@ourfuture.off</a>
-    </footer>
 
     <!-- PANIER LATÉRAL (DROITE) -->
     <div id="cart-sidebar">
@@ -174,16 +172,42 @@
                 <div id="view-adresses" class="dashboard-view">
                     <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Mes Adresses</h3>
-                    <p class="empty-state">Aucune adresse enregistrée.</p>
-                    <button class="btn-buy" style="border-color:#444; padding:10px;">+ Ajouter une adresse</button>
+                    
+                    <div id="adresses-list">
+                        <p class="empty-state">Aucune adresse enregistrée.</p>
+                    </div>
+
+                    <button class="btn-buy" id="btn-show-address" style="border-color:#444; margin-bottom: 15px;">+ Ajouter une adresse</button>
+                    
+                    <form id="form-address" style="display: none;" onsubmit="sauvegarderAdresse(event)">
+                        <input type="text" id="addr-rue" placeholder="Numéro et rue" required>
+                        <input type="text" id="addr-cp" placeholder="Code postal" required>
+                        <input type="text" id="addr-ville" placeholder="Ville" required>
+                        <button type="submit" class="btn-buy" style="background:#fff; color:#000;">ENREGISTRER</button>
+                    </form>
                 </div>
 
                 <!-- Vue: Paiement -->
                 <div id="view-paiement" class="dashboard-view">
                     <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Moyens de paiement</h3>
-                    <p class="empty-state">Aucun moyen de paiement enregistré.</p>
-                    <button class="btn-buy" style="border-color:#444; padding:10px;">+ Ajouter une carte</button>
+                    
+                    <div id="cartes-list">
+                        <p class="empty-state">Aucun moyen de paiement enregistré.</p>
+                    </div>
+
+                    <button class="btn-buy" id="btn-show-card" style="border-color:#444; margin-bottom: 15px;">+ Ajouter une carte</button>
+                    
+                    <form id="form-card" style="display: none;" onsubmit="sauvegarderCarte(event)">
+                        <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">(Sécurisé en attendant Stripe)</p>
+                        <input type="text" id="card-nom" placeholder="Nom sur la carte" required>
+                        <input type="text" id="card-numero" placeholder="Numéro de carte (ex: 4242 4242...)" maxlength="16" required>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="card-exp" placeholder="MM/AA" maxlength="5" required>
+                            <input type="text" id="card-cvc" placeholder="CVC" maxlength="3" required>
+                        </div>
+                        <button type="submit" class="btn-buy" style="background:#fff; color:#000;">ENREGISTRER</button>
+                    </form>
                 </div>
 
                 <!-- Vue: Retours -->
@@ -199,14 +223,13 @@
                     <h3 class="montserrat" style="margin-bottom:15px;">Paramètres</h3>
                     <input type="text" placeholder="Prénom">
                     <input type="text" placeholder="Nom">
-                    <button class="btn-buy" style="background:#fff; color:#000;">ENREGISTRER</button>
+                    <button class="btn-buy" style="background:#fff; color:#000;">METTRE À JOUR</button>
                 </div>
 
                 <!-- Vue: Support -->
                 <div id="view-support" class="dashboard-view">
                     <button class="btn-back" onclick="closeView()">⬅ Retour au menu</button>
                     <h3 class="montserrat" style="margin-bottom:15px;">Support Client</h3>
-                    <!-- Formulaire de contact qui envoie le message -->
                     <form onsubmit="envoyerMessage(event)">
                         <input type="text" id="sujet-support" placeholder="Sujet de ta demande" required>
                         <textarea id="message-support" placeholder="Explique-nous ton problème..." rows="5" required></textarea>
